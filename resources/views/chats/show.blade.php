@@ -22,23 +22,32 @@
   </div>
   
   <div class="h-96 overflow-y-auto p-6" id="messages-container">
-    @foreach($chat->messages as $message)
-    <div class="mb-4 @if($message->sender_id == auth()->id()) text-right @endif">
-      <div class="@if($message->sender_id == auth()->id()) bg-purple-100 @else bg-gray-100 @endif inline-block rounded-lg px-4 py-2 max-w-xs md:max-w-md">
-        <p>{{ $message->content }}</p>
-        <p class="text-xs text-gray-500 mt-1">
-          {{ $message->created_at->format('d.m.Y H:i') }}
-          @if($message->sender_id == auth()->id())
-            @if($message->is_read)
-              <span class="text-green-500">✓ Прочитано</span>
-            @else
-              <span class="text-gray-500">✓ Отправлено</span>
-            @endif
-          @endif
-        </p>
-      </div>
-    </div>
-    @endforeach
+
+@foreach($chat->messages as $message)
+<div class="mb-4 @if($message->sender_id == auth()->id()) text-right @endif" id="message-{{ $message->id }}">
+  <div class="@if($message->sender_id == auth()->id()) bg-purple-100 @else bg-gray-100 @endif inline-block rounded-lg px-4 py-2 max-w-xs md:max-w-md relative">
+    @if((auth()->user()->isAdmin() || auth()->user()->isEducator()) && $message->sender_id != auth()->id())
+      <button class="absolute top-0 right-0 p-1 text-gray-500 hover:text-red-500 delete-message" 
+              data-message-id="{{ $message->id }}" title="Удалить сообщение">
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    @endif
+    <p>{{ $message->content }}</p>
+    <p class="text-xs text-gray-500 mt-1">
+      {{ $message->created_at->format('d.m.Y H:i') }}
+      @if($message->sender_id == auth()->id())
+        @if($message->is_read)
+          <span class="text-green-500">✓ Прочитано</span>
+        @else
+          <span class="text-gray-500">✓ Отправлено</span>
+        @endif
+      @endif
+    </p>
+  </div>
+</div>
+@endforeach
   </div>
   
   <div class="p-6 border-t border-gray-200">
@@ -129,6 +138,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
         scrollToBottom();
     }
+
+  document.addEventListener('click', function(e) {
+      if (e.target.closest('.delete-message')) {
+          const messageId = e.target.closest('.delete-message').dataset.messageId;
+          if (confirm('Вы уверены, что хотите удалить это сообщение?')) {
+              fetch(`/messages/${messageId}`, {
+                  method: 'DELETE',
+                  headers: {
+                      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                      'Accept': 'application/json'
+                  }
+              })
+              .then(response => {
+                  if (response.ok) {
+                      document.getElementById(`message-${messageId}`).remove();
+                  } else {
+                      alert('Ошибка при удалении сообщения');
+                  }
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+                  alert('Ошибка при удалении сообщения');
+              });
+          }
+      }
+  });
 
     function checkMessageStatuses() {
         if (myUnreadMessages.length === 0) return;
@@ -222,5 +257,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isPolling) checkNewMessages();
     });
 });
+
+
+
 </script>
 @endsection

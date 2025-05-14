@@ -311,4 +311,19 @@ class ChatController extends Controller
             'status' => 'success'
         ]);
     }
+
+    public function deleteMessage(User $user, Message $message)
+    {
+        // Проверяем права на удаление
+        if ($user->isParent()) {
+            abort(403, 'У вас нет прав на удаление этого сообщения');
+        }
+
+        $message->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Сообщение удалено'
+        ]);
+    }
 }

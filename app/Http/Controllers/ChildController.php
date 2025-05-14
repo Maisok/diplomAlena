@@ -7,6 +7,7 @@ use App\Models\Group;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class ChildController extends Controller
 {
@@ -53,6 +54,7 @@ class ChildController extends Controller
         if (!auth()->user()->isAdmin()) {
             return redirect()->route('home');
         }
+    
         $validated = $request->validate([
             'last_name' => 'required|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
             'first_name' => 'required|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
@@ -64,7 +66,7 @@ class ChildController extends Controller
                     $birthDate = new \DateTime($value);
                     $today = new \DateTime();
                     $age = $today->diff($birthDate);
-                    
+    
                     if ($age->y >= 8 || ($age->y * 12 + $age->m) < 18) {
                         $fail('Ребенку должно быть от 18 месяцев до 8 лет.');
                     }
@@ -75,8 +77,29 @@ class ChildController extends Controller
                 'exists:groups,id',
                 function ($attribute, $value, $fail) {
                     $group = Group::find($value);
+                    
+                    // Проверка на переполнение группы
                     if ($group && $group->children_count >= 15) {
                         $fail('В этой группе уже максимальное количество детей (15).');
+                    }
+    
+                    // Получаем всех детей в группе
+                    $existingChildren = $group->children;
+    
+                    if ($existingChildren->isNotEmpty()) {
+                        // Получаем минимальную и максимальную дату рождения
+                        $minBirthDate = $existingChildren->min('birth_date');
+                        $maxBirthDate = $existingChildren->max('birth_date');
+    
+                        $newBirthDate = Carbon::parse(request()->input('birth_date'));
+    
+                        // Диапазон допустимых дат для нового ребёнка
+                        $minAllowedDate = Carbon::parse($minBirthDate)->subYear();
+                        $maxAllowedDate = Carbon::parse($maxBirthDate)->addYear();
+    
+                        if ($newBirthDate < $minAllowedDate || $newBirthDate > $maxAllowedDate) {
+                            $fail('Нельзя добавить ребёнка в эту группу из-за большой разницы в возрасте.');
+                        }
                     }
                 },
             ],
@@ -89,9 +112,9 @@ class ChildController extends Controller
             'group_id.exists' => 'Выбранная группа не существует',
             'parent_id.exists' => 'Выбранный родитель не существует',
         ]);
-
+    
         Child::create($validated);
-
+    
         return redirect()->route('children.index')
             ->with('success', 'Ребенок успешно добавлен.');
     }

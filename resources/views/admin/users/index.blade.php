@@ -112,11 +112,13 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <a href="{{ route('users.edit', $user) }}" 
                                            class="text-[#4A3F9B] hover:text-[#D32F2F] mr-4 transition">Редактировать</a>
-                                        <form action="{{ route('users.destroy', $user) }}" method="POST" class="inline" onsubmit="return confirm('Вы уверены?')">
+                                           @if (!$user->status == 'admin')
+                                           <form action="{{ route('users.destroy', $user) }}" method="POST" class="inline" onsubmit="return confirm('Вы уверены?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="text-red-600 hover:text-red-900 transition">Удалить</button>
                                         </form>
+                                           @endif
                                     </td>
                                 </tr>
                                 @endforeach
