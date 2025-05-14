@@ -1,0 +1,41 @@
+
+composer install
+npm install -D tailwindcss postcss autoprefixer
+php artisan key:generate
+php artisan migarte
+php artisan create:admin
+php artisan serve
+npm run dev
+
+
+php artisan config:clear
+php artisan cache:clear
+
+
+
+
+
+
+
+
+
+
+
+composer require maatwebsite/excel --ignore-platform-reqs
+composer require maatwebsite/excel
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+php artisan key:generate
+php artisan migarte
+php artisan serve   
+npm run dev
+php artisan appointments:update-status
+php artisan schedule:run
+php artisan create:admin
+php artisan storage:link
+
+php artisan optimize
+php artisan cache:clear
+php artisan route:cache
+php artisan view:clear
+php artisan config:cache
