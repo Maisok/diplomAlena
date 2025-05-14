@@ -71,7 +71,11 @@
                             <input type="text" name="patronymic" id="patronymic" value="{{ $user->patronymic }}"
                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A3F9B] focus:border-[#4A3F9B] transition" maxlength="50">
                         </div>
+<<<<<<< HEAD
                         @if (!$user->status == 'admin')
+=======
+
+>>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
                         <div>
                             <label for="status" class="block text-gray-700 font-medium mb-2">Статус</label>
                             <select name="status" id="status" 
@@ -81,7 +85,10 @@
                                     <option value="educator" {{ $user->status == 'educator' ? 'selected' : '' }}>Воспитатель</option>
                             </select>
                         </div>
+<<<<<<< HEAD
                         @endif
+=======
+>>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
 
                         <div>
                             <label for="phone_number" class="block text-gray-700 font-medium mb-2">Телефон</label>

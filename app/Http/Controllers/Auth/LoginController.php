@@ -37,7 +37,11 @@ class LoginController extends Controller
         $body = json_decode((string) $response->getBody());
 
         if (!$body->success) {
+<<<<<<< HEAD
             return redirect()->back()->withErrors(['g-recaptcha-response' => 'reCAPTCHA: проверка не пройдена.']);
+=======
+            return redirect()->back()->withErrors(['g-recaptcha-response' => 'reCAPTCHA verification failed.']);
+>>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
         }
 
 
@@ -48,7 +52,11 @@ class LoginController extends Controller
         }
 
         return back()->withErrors([
+<<<<<<< HEAD
             'login' => 'Неверный логин или пароль.',
+=======
+            'login' => 'The provided credentials do not match our records.',
+>>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
         ]);
     }
 

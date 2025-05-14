@@ -17,7 +17,11 @@ return new class extends Migration
             $table->string('first_name', 50);
             $table->string('patronymic', 50)->nullable();
             $table->enum('status', ['parent', 'admin', 'educator']);
+<<<<<<< HEAD
             $table->string('phone_number', 20)->unique()->nullable();
+=======
+            $table->string('phone_number', 20)->unique()->nullable(); // +7 (XXX) XXX-XX-XX
+>>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
             $table->string('email', 100)->unique()->nullable();
             $table->string('login', 50)->unique();
             $table->string('password', 255); // Для хэшей

@@ -22,6 +22,7 @@
   </div>
   
   <div class="h-96 overflow-y-auto p-6" id="messages-container">
+<<<<<<< HEAD
 
 @foreach($chat->messages as $message)
 <div class="mb-4 @if($message->sender_id == auth()->id()) text-right @endif" id="message-{{ $message->id }}">
@@ -48,6 +49,25 @@
   </div>
 </div>
 @endforeach
+=======
+    @foreach($chat->messages as $message)
+    <div class="mb-4 @if($message->sender_id == auth()->id()) text-right @endif">
+      <div class="@if($message->sender_id == auth()->id()) bg-purple-100 @else bg-gray-100 @endif inline-block rounded-lg px-4 py-2 max-w-xs md:max-w-md">
+        <p>{{ $message->content }}</p>
+        <p class="text-xs text-gray-500 mt-1">
+          {{ $message->created_at->format('d.m.Y H:i') }}
+          @if($message->sender_id == auth()->id())
+            @if($message->is_read)
+              <span class="text-green-500">✓ Прочитано</span>
+            @else
+              <span class="text-gray-500">✓ Отправлено</span>
+            @endif
+          @endif
+        </p>
+      </div>
+    </div>
+    @endforeach
+>>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
   </div>
   
   <div class="p-6 border-t border-gray-200">
@@ -139,6 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
         scrollToBottom();
     }
 
+<<<<<<< HEAD
   document.addEventListener('click', function(e) {
       if (e.target.closest('.delete-message')) {
           const messageId = e.target.closest('.delete-message').dataset.messageId;
@@ -165,6 +186,8 @@ document.addEventListener('DOMContentLoaded', function() {
       }
   });
 
+=======
+>>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
     function checkMessageStatuses() {
         if (myUnreadMessages.length === 0) return;
 
@@ -257,8 +280,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isPolling) checkNewMessages();
     });
 });
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
 </script>
 @endsection
