@@ -45,7 +45,7 @@ class UserController extends Controller
             'last_name' => 'required|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
             'first_name' => 'required|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
             'patronymic' => 'nullable|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
-            'status' => 'required|in:parent,admin,educator',
+            'status' => 'required|in:parent,educator',
             'phone_number' => 'required|string|max:20|regex:/^8 \d{3} \d{3} \d{2} \d{2}$/|unique:users,phone_number',
             'email' => 'required|email|max:100|regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/|unique:users,email',
             'login' => 'required|string|max:5|min:5|unique:users,login',
@@ -84,7 +84,7 @@ class UserController extends Controller
             'last_name' => 'required|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
             'first_name' => 'required|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
             'patronymic' => 'nullable|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
-            'status' => 'required|in:parent,admin,educator',
+            'status' => 'required|in:parent,educator',
             'phone_number' => [
                 'required',
                 'string',

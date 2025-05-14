@@ -49,11 +49,7 @@
 
                             <div class="mb-4">
                                 <label for="login" class="block text-gray-700 text-sm font-bold mb-2">Логин (5 цифр)</label>
-<<<<<<< HEAD
                                 <input id="login" maxlength="5" type="text" class="form-control @error('login') is-invalid @enderror bg-gray-200 rounded-lg p-2 w-full" name="login" value="{{ old('login') }}" required autocomplete="login" autofocus>
-=======
-                                <input id="login" type="text" class="form-control @error('login') is-invalid @enderror bg-gray-200 rounded-lg p-2 w-full" name="login" value="{{ old('login') }}" required autocomplete="login" autofocus>
->>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
                                 @error('login')
                                     <span class="invalid-feedback text-red-500 text-xs mt-1" role="alert">
                                         <strong>{{ $message }}</strong>

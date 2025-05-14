@@ -44,10 +44,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('certificates', CertificateController::class);
     Route::resource('children', ChildController::class);
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-<<<<<<< HEAD
     Route::delete('/messages/{message}', [ChatController::class, 'deleteMessage'])->name('messages.delete');
-=======
->>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
 });
 
 

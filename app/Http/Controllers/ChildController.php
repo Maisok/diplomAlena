@@ -7,10 +7,7 @@ use App\Models\Group;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-<<<<<<< HEAD
 use Carbon\Carbon;
-=======
->>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
 
 class ChildController extends Controller
 {
@@ -57,10 +54,7 @@ class ChildController extends Controller
         if (!auth()->user()->isAdmin()) {
             return redirect()->route('home');
         }
-<<<<<<< HEAD
     
-=======
->>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
         $validated = $request->validate([
             'last_name' => 'required|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
             'first_name' => 'required|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
@@ -72,11 +66,7 @@ class ChildController extends Controller
                     $birthDate = new \DateTime($value);
                     $today = new \DateTime();
                     $age = $today->diff($birthDate);
-<<<<<<< HEAD
     
-=======
-                    
->>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
                     if ($age->y >= 8 || ($age->y * 12 + $age->m) < 18) {
                         $fail('Ребенку должно быть от 18 месяцев до 8 лет.');
                     }
@@ -87,7 +77,6 @@ class ChildController extends Controller
                 'exists:groups,id',
                 function ($attribute, $value, $fail) {
                     $group = Group::find($value);
-<<<<<<< HEAD
                     
                     // Проверка на переполнение группы
                     if ($group && $group->children_count >= 15) {
@@ -112,11 +101,6 @@ class ChildController extends Controller
                             $fail('Нельзя добавить ребёнка в эту группу из-за большой разницы в возрасте.');
                         }
                     }
-=======
-                    if ($group && $group->children_count >= 15) {
-                        $fail('В этой группе уже максимальное количество детей (15).');
-                    }
->>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
                 },
             ],
             'parent_id' => 'required|exists:users,id',
@@ -128,15 +112,9 @@ class ChildController extends Controller
             'group_id.exists' => 'Выбранная группа не существует',
             'parent_id.exists' => 'Выбранный родитель не существует',
         ]);
-<<<<<<< HEAD
     
         Child::create($validated);
     
-=======
-
-        Child::create($validated);
-
->>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
         return redirect()->route('children.index')
             ->with('success', 'Ребенок успешно добавлен.');
     }
