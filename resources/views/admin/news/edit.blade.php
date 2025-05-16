@@ -54,7 +54,7 @@
 
                             <div>
                                 <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Описание</label>
-                                <textarea name="description" id="description" rows="8"
+                                <textarea name="description" id="description" rows="8" maxlength="600"
                                           class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg"
                                           required>{{ old('description', $news->description) }}</textarea>
                             </div>

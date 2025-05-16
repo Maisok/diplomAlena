@@ -35,7 +35,24 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
+
+        
     </style>
+
+<style>
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
 </head>
 <body class="bg-gray-100">
     <x-header/>
@@ -86,14 +103,14 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($news as $item)
                                 <tr class="table-row transition">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">
-                                            {{ $item->title }}
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm font-medium text-gray-900 break-words max-w-[200px] line-clamp-2">
+                                            {{ Str::limit($item->title, 200) }}
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 description-cell">
-                                        <div class="text-sm text-gray-500">
-                                            {{ $item->description }}
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm text-gray-500 break-words max-w-[400px] line-clamp-3">
+                                            {{ Str::limit($item->description, 1000) }}
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -123,6 +140,29 @@
                             </tbody>
                         </table>
                     </div>
+                    @if($news->lastPage() > 1)
+                    <div class="m-8 flex justify-center">
+                      <div class="flex space-x-2">
+                        @if($news->currentPage() > 1)
+                          <a href="{{ $news->previousPageUrl() }}" class="px-4 py-2 bg-white rounded-lg shadow hover:bg-purple-50">
+                            Назад
+                          </a>
+                        @endif
+                        
+                        @for($i = 1; $i <= $news->lastPage(); $i++)
+                          <a href="{{ $news->url($i) }}" class="px-4 py-2 {{ $i == $news->currentPage() ? 'bg-purple-600 text-white' : 'bg-white' }} rounded-lg shadow hover:bg-purple-50">
+                            {{ $i }}
+                          </a>
+                        @endfor
+                        
+                        @if($news->hasMorePages())
+                          <a href="{{ $news->nextPageUrl() }}" class="px-4 py-2 bg-white rounded-lg shadow hover:bg-purple-50">
+                            Вперед
+                          </a>
+                        @endif
+                      </div>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>

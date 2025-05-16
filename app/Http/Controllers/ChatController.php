@@ -311,7 +311,6 @@ class ChatController extends Controller
             'status' => 'success'
         ]);
     }
-<<<<<<< HEAD
 
     public function deleteMessage(User $user, Message $message)
     {
@@ -327,6 +326,4 @@ class ChatController extends Controller
             'message' => 'Сообщение удалено'
         ]);
     }
-=======
->>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
 }

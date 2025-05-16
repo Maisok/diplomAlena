@@ -195,6 +195,23 @@
         <div id="group-{{ $group_data['group']->id }}" class="group-content {{ $loop->first ? 'block' : 'hidden' }}">
           <h3 class="text-lg font-semibold mb-4">Дети в группе {{ $group_data['group']->name }}</h3>
           
+          <!-- Блок с информацией о воспитателе -->
+          @if($group_data['group']->educator)
+          <div class="bg-purple-50 p-4 rounded-lg mb-4">
+            <h4 class="font-medium">Воспитатель группы:</h4>
+            <div class="flex items-center space-x-3 mt-2">
+              <div>
+                <p class="">
+                  {{ $group_data['group']->educator->last_name }} 
+                  {{ $group_data['group']->educator->first_name }} 
+                  {{ $group_data['group']->educator->patronymic }}
+                </p>
+                <p class="text-sm">Контакты: {{ $group_data['group']->educator->phone_number }}</p>
+              </div>
+            </div>
+          </div>
+          @endif
+          
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             @foreach($group_data['children'] as $child)
             <div class="bg-purple-50 p-4 rounded-lg hover:bg-purple-100 transition">
@@ -214,7 +231,7 @@
         @endforeach
       </div>
     </div>
-    @endif
+@endif
   </div>
 </section>
 <x-footer/>

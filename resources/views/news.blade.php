@@ -73,12 +73,12 @@
             </div>
             <div class="p-6 md:w-2/3 flex flex-col">
               <div class="flex justify-between items-start mb-2">
-                <h2 class="text-xl font-bold text-gray-800">{{ $news->title }}</h2>
-                <span class="bg-purple-100 text-purple-800 text-xs px-3 py-1 rounded-full">
+                <h2 class="text-xl font-bold text-gray-800 flex-grow break-words overflow-hidden">{{ $news->title }}</h2>
+                <span class="bg-purple-100 text-purple-800 text-xs px-3 py-1 rounded-full whitespace-nowrap ml-2">
                   {{ $news->created_at->format('d.m.Y') }}
                 </span>
               </div>
-              <p class="text-gray-600 mb-4 flex-grow">{{ $news->description }}</p>
+              <p class="text-gray-600 mb-4 flex-grow break-words overflow-hidden">{{ $news->description }}</p>
             </div>
           </div>
         </div>
@@ -120,6 +120,7 @@
       </div>
     @endif
   </div>
+  
 </main>
 
 <!-- Дополнительная информация -->

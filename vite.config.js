@@ -9,6 +9,6 @@ export default defineConfig({
         }),
     ],
     optimizeDeps: {
-        exclude: ['tailwindcss'], // <-- Добавь это
+        exclude: ['tailwindcss'],
     },
 });

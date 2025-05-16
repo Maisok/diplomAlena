@@ -35,7 +35,7 @@ class NewsController extends Controller
         }
         $validated = $request->validate([
             'title' => 'required|string|max:200',
-            'description' => 'required|string',
+            'description' => 'required|string|max:600',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ], [
             'title.max' => 'Заголовок не должен превышать 200 символов',
@@ -79,7 +79,7 @@ class NewsController extends Controller
         }
         $validated = $request->validate([
             'title' => 'required|string|max:200',
-            'description' => 'required|string',
+            'description' => 'required|string|max:600',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ], [
             'title.max' => 'Заголовок не должен превышать 200 символов',
@@ -165,8 +165,8 @@ class NewsController extends Controller
             } else {
                 // Отправка только текста
                 $response = Http::withoutVerifying()
-                    ->post("https://api.telegram.org/bot".env('TELEGRAM_BOT_TOKEN')."/sendMessage", [
-                        'chat_id' => env('TELEGRAM_CHANNEL_ID'),
+                    ->post("https://api.telegram.org/bot".'7651468520:AAGBmLjvDVMG9aB6FuP7aT8e63sEoorXlBE'."/sendMessage", [
+                        'chat_id' => '-1002196805641',
                         'text' => $message,
                         'parse_mode' => 'HTML'
                     ]);
