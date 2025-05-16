@@ -138,47 +138,58 @@ class NewsController extends Controller
     }
 
     private function sendToTelegram(News $news)
-    {
-        try {
-            $message = "📢 <b>Новая новость!</b>\n\n".
-                       "<b>{$news->title}</b>\n\n".
-                       "{$news->description}\n\n".
-                       "<a href=\"".url('/news/'.$news->id)."\">Читать полностью</a>";
-    
-            $payload = [
-                'chat_id' => env('TELEGRAM_CHANNEL_ID'),
-                'parse_mode' => 'HTML'
-            ];
-    
-            // Если есть изображение
-            if ($news->image) {
-                $imagePath = storage_path('app/public/'.$news->image);
-                
-                // Отправка фото с подписью
-                $response = Http::withoutVerifying()
-                    ->attach('photo', fopen($imagePath, 'r'))
-                    ->post("https://api.telegram.org/bot".env('TELEGRAM_BOT_TOKEN')."/sendPhoto", [
-                        'chat_id' => env('TELEGRAM_CHANNEL_ID'),
-                        'caption' => $message,
-                        'parse_mode' => 'HTML'
-                    ]);
-            } else {
-                // Отправка только текста
-                $response = Http::withoutVerifying()
-                    ->post("https://api.telegram.org/bot".'7651468520:AAGBmLjvDVMG9aB6FuP7aT8e63sEoorXlBE'."/sendMessage", [
-                        'chat_id' => '-1002196805641',
-                        'text' => $message,
-                        'parse_mode' => 'HTML'
-                    ]);
+{
+    try {
+        $botToken = '7651468520:AAGBmLjvDVMG9aB6FuP7aT8e63sEoorXlBE';
+        $chatId = '-1002196805641';
+        
+        $message = "📢 <b>Новая новость!</b>\n\n".
+                   "<b>{$news->title}</b>\n\n".
+                   "{$news->description}\n\n".
+                   "<a href=\"".url('/news/'.$news->id)."\">Читать полностью</a>";
+
+        // Если есть изображение
+        if ($news->image) {
+            $imagePath = storage_path('app/public/'.$news->image);
+            
+            if (!file_exists($imagePath)) {
+                throw new \Exception("Image file not found: {$imagePath}");
             }
-    
-            if (!$response->successful()) {
-                \Log::error('Telegram API Error: '.$response->body());
-                throw new \Exception($response->body());
-            }
-    
-        } catch (\Exception $e) {
-            \Log::error('Telegram sending error: '.$e->getMessage());
+
+            // Отправка фото с подписью (используем sendPhoto)
+            $response = Http::withoutVerifying()
+                ->attach('photo', fopen($imagePath, 'r'))
+                ->post("https://api.telegram.org/bot{$botToken}/sendPhoto", [
+                    'chat_id' => $chatId,
+                    'caption' => $message,
+                    'parse_mode' => 'HTML'
+                ]);
+        } else {
+            // Отправка только текста (используем sendMessage)
+            $response = Http::withoutVerifying()
+                ->post("https://api.telegram.org/bot{$botToken}/sendMessage", [
+                    'chat_id' => $chatId,
+                    'text' => $message,
+                    'parse_mode' => 'HTML',
+                    'disable_web_page_preview' => true
+                ]);
         }
+
+        if (!$response->successful()) {
+            \Log::error('Telegram API Error', [
+                'response' => $response->json(),
+                'status' => $response->status(),
+                'news_id' => $news->id
+            ]);
+            throw new \Exception($response->body());
+        }
+
+    } catch (\Exception $e) {
+        \Log::error('Telegram sending error', [
+            'error' => $e->getMessage(),
+            'news_id' => $news->id,
+            'trace' => $e->getTraceAsString()
+        ]);
     }
+}
 }
