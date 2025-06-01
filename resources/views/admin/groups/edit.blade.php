@@ -60,17 +60,22 @@
                             </div>
 
                             <div>
-                                <label for="educator_id" class="block text-sm font-medium text-gray-700 mb-2">Воспитатель</label>
+                                <label for="educator_id" class="block text-sm font-medium text-gray-700 mb-2">Воспитатель или няня</label>
                                 <select name="educator_id" id="educator_id" 
                                         class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg" required>
-                                    @foreach($educators as $educator)
-                                        <option value="{{ $educator->id }}" 
-                                            {{ old('educator_id', $group->educator_id) == $educator->id ? 'selected' : '' }}
-                                            {{ $educator->groups->isNotEmpty() && $educator->id != $group->educator_id ? 'disabled' : '' }}
-                                            class="{{ $educator->groups->isNotEmpty() && $educator->id != $group->educator_id ? 'disabled-option' : '' }}">
-                                            {{ $educator->full_name }}
-                                            @if($educator->groups->isNotEmpty() && $educator->id != $group->educator_id)
-                                                (Уже назначен в группу "{{ $educator->groups->first()->name }}")
+                                    @foreach($educators as $user)
+                                        @php
+                                            // Проверяем, есть ли у пользователя закреплённая группа
+                                            $isBusy = $user->groups->isNotEmpty() && $user->id != $group->educator_id;
+                                        @endphp
+                            
+                                        <option value="{{ $user->id }}" 
+                                            {{ old('educator_id', $group->educator_id) == $user->id ? 'selected' : '' }}
+                                            {{ $isBusy ? 'disabled' : '' }}
+                                            class="{{ $isBusy ? 'disabled-option' : '' }}">
+                                            {{ $user->full_name }} ({{ $user->status === 'educator' ? 'Воспитатель' : 'Няня' }})
+                                            @if($isBusy)
+                                                — занята в "{{ $user->groups->first()->name }}"
                                             @endif
                                         </option>
                                     @endforeach

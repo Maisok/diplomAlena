@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ScheduleItem;
+use App\Models\TrustedPerson;
 use App\Models\ActivityCategory;
 use Carbon\Carbon;
 
@@ -44,14 +45,23 @@ class ProfileController extends Controller
     protected function getEducatorData($user)
     {
         $group = $user->groups->first();
-        $children = $group ? $group->children()->orderBy('last_name')->get() : collect();
-
+        $children = $group ? $group->children()
+        ->with('parent.trustedPeople')
+        ->orderBy('last_name')->get() : collect();
+    
+        // Получаем всех родителей из группы
+        $parentIds = $children->pluck('parent_id')->unique();
+    
+        // Получаем все доверенные лица этих родителей
+        $trustedPeople = TrustedPerson::whereIn('parent_id', $parentIds)->get();
+    
         return [
             'is_educator' => true,
             'group' => $group,
             'children' => $children,
             'schedule_items' => $group ? $this->getGroupSchedule($group) : [],
-            'activity_categories' => ActivityCategory::all()->keyBy('id')
+            'activity_categories' => ActivityCategory::all()->keyBy('id'),
+            'trusted_people' => $trustedPeople,
         ];
     }
 
@@ -59,6 +69,7 @@ class ProfileController extends Controller
     {
         $children = $user->children()->with('group')->orderBy('last_name')->get();
         $childrenByGroup = $children->groupBy('group_id');
+        $trustedPeople = TrustedPerson::where('parent_id', $user->id)->get();
         
         $groupsData = [];
         foreach ($childrenByGroup as $groupId => $groupChildren) {
@@ -74,6 +85,7 @@ class ProfileController extends Controller
             'is_parent' => true,
             'children' => $children,
             'groups_data' => $groupsData,
+            'trusted_people' => $trustedPeople,
             'upcoming_events' => $this->getParentEvents($user)
         ];
     }

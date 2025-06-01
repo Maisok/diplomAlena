@@ -106,11 +106,18 @@
           </div>
           
           @if($user->isEducator() && $group)
-          <div class="bg-purple-50 p-4 rounded-lg">
-            <h3 class="font-semibold text-purple-700 mb-2">Группа</h3>
-            <p class="text-gray-700"><span class="font-medium">Название:</span> {{ $group->name }}</p>
-            <p class="text-gray-700"><span class="font-medium">Детей в группе:</span> {{ $children->count() }}</p>
-          </div>
+              <div class="bg-purple-50 p-4 rounded-lg">
+                  <h3 class="font-semibold text-purple-700 mb-2">Группа</h3>
+                  <p class="text-gray-700"><span class="font-medium">Название:</span> {{ $group->name }}</p>
+                  <p class="text-gray-700"><span class="font-medium">Детей в группе:</span> {{ $children->count() }}</p>
+          
+                  <!-- Кнопка -->
+                  <button type="button"
+                          onclick="document.getElementById('children-modal').classList.remove('hidden')"
+                          class="mt-4 inline-flex items-center px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-medium text-sm rounded-lg shadow-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50">
+                      Посмотреть список детей
+                  </button>
+              </div>
           @endif
           
           @if($user->isParent() && $children->count())
@@ -142,12 +149,7 @@
             
             <!-- Выпадающий список детей -->
             <div class="dropdown relative">
-              <button class="bg-white text-purple-700 px-4 py-2 rounded-full hover:bg-purple-50 transition flex items-center">
-                <span>Дети в группе ({{ $children->count() }})</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+              
               <div class="dropdown-content mt-2 p-4">
                 <ul class="space-y-2">
                   @foreach($children as $child)
@@ -231,9 +233,131 @@
         @endforeach
       </div>
     </div>
+    <!-- Блок доверенных лиц -->
+@if($trusted_people->isNotEmpty())
+<div class="mt-8 bg-white rounded-xl shadow-lg overflow-hidden hover-scale animate-fade-in-up max-w-6xl mx-auto">
+  <div class="bg-gradient-to-r from-purple-500 to-purple-700 p-6 text-white">
+        <h2 class="text-xl font-bold">Доверенные лица</h2>
+    </div>
+
+    <div class="p-6">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">ФИО</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Телефон</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach($trusted_people as $person)
+                        <tr class="hover:bg-gray-50 transition duration-100">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {{ $person->last_name }} {{ $person->first_name }} {{ $person->patronymic ?? '' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                {{ $person->phone_number ?: '—' }}
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@else
+<div class="mt-8 bg-white rounded-xl shadow-lg overflow-hidden p-6 max-w-6xl mx-auto">
+    <h3 class="font-semibold text-gray-800 mb-2">Доверенные лица</h3>
+    <p class="text-gray-600">Вы пока не добавили ни одно доверенное лицо.</p>
+</div>
+@endif
 @endif
   </div>
 </section>
+@if($user->isEducator() && $group)
+          <!-- Модальное окно -->
+          <div id="children-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+            <!-- Затемнение фона -->
+            <div class="absolute inset-0 bg-black opacity-70"></div>
+    
+            <!-- Основное окно -->
+            <div class="relative bg-white rounded-lg shadow-2xl w-full max-w-5xl mx-4 max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center border-b px-6 py-4">
+                    <h4 class="text-2xl font-bold text-gray-800">Список детей группы "{{ $group->name }}"</h4>
+                    <button type="button"
+                            onclick="document.getElementById('children-modal').classList.add('hidden')"
+                            class="text-gray-500 hover:text-gray-800 transition duration-150">
+                        &times;
+                    </button>
+                </div>
+    
+                <!-- Таблица -->
+                <div class="overflow-x-auto">
+                  <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Ребёнок</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Дата рождения</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Родитель</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Контакты</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Доверенные лица</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach ($children as $child)
+                            <tr class="hover:bg-gray-50 transition duration-100">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {{ $child->last_name }} {{ $child->first_name }} {{ $child->patronymic }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                    {{ \Carbon\Carbon::parse($child->birth_date)->format('d.m.Y') }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                    @if ($child->parent)
+                                        {{ $child->parent->last_name }} {{ $child->parent->first_name }} {{ $child->parent->patronymic }}
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                    @if ($child->parent)
+                                        📞 {{ $child->parent->phone_number }}<br>
+                                        📧 {{ $child->parent->email }}
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                    @if ($child->parent && $child->parent->trustedPeople->isNotEmpty())
+                                        <ul class="list-disc list-inside space-y-1">
+                                            @foreach ($child->parent->trustedPeople as $person)
+                                                <li>
+                                                    <strong>{{ $person->last_name }} {{ $person->first_name }}</strong><br>
+                                                    📞 {{ $person->phone_number ?: '—' }}
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                </div>
+    
+                <!-- Футер с кнопкой закрытия -->
+                <div class="border-t px-6 py-4 flex justify-end">
+                    <button type="button"
+                            onclick="document.getElementById('children-modal').classList.add('hidden')"
+                            class="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition duration-150">
+                        Закрыть
+                    </button>
+                </div>
+            </div>
+        </div>
+        @endif
 <x-footer/>
 <script>
     // Переключение табов групп для родителя

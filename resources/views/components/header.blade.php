@@ -11,6 +11,9 @@
 
     <!-- Основное меню для десктопа -->
     <div class="hidden md:flex space-x-6 lg:space-x-8 xl:space-x-10 items-center">
+        <a class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:bg-[#6a56c5]" href="{{route('group.schedules')}}">
+            РАСПИСАНИЕ
+        </a>
         @if(auth()->check())
         <a class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:bg-[#6a56c5]" href="{{route('shownews.index')}}">
             НОВОСТИ
@@ -77,6 +80,8 @@
         <a class="text-white hover:bg-[#6a56c5] px-4 py-3 rounded-md text-base font-medium transition-all duration-300" href="{{route('about')}}">
             РОДИТЕЛЯМ
         </a>
+
+        
         
         <a class="text-white hover:bg-[#6a56c5] px-4 py-3 rounded-md text-base font-medium transition-all duration-300" href="{{route('certificates.display')}}">
             ЛИЦЕНЗИИ

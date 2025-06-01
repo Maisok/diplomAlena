@@ -1,28 +1,55 @@
 @extends('layouts.chat')
 
 @section('page-title', 'ЧАТ')
-@section('page-subtitle', 'Общение с ' . ($chat->participant->full_name ?? 'администрацией'))
+@section('page-subtitle', 'Общение с ' . 
+    (
+        match($chat->type) {
+            'parent_educator' => $chat->participant->full_name,
+            'parent_admin' => 'администрацией',
+            'admin_educator' => auth()->user()->isAdmin() ? $chat->participant->full_name : 'администрацией',
+            default => 'пользователем'
+        }
+    )
+)
 
 @section('content')
 <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg hover-scale animate-fade-in-up">
   <div class="p-6 border-b border-gray-200">
     <h2 class="text-xl font-semibold flex items-center">
-      @if(auth()->user()->isParent())
-        <svg class="w-6 h-6 text-[#4A3F9B] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-        </svg>
-        {{ $chat->participant->full_name }}
-      @else
+        @if(auth()->user()->isParent())
         <svg class="w-6 h-6 text-[#D32F2F] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-        </svg>
-        {{ $chat->parent->full_name }}
-      @endif
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+          </svg>
+        {{ $chat->participant->full_name ?? 'Не указан' }}
+    
+    @elseif(auth()->user()->isEducator() && $chat->type === 'parent_educator')
+    <svg class="w-6 h-6 text-[#D32F2F] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+      </svg>
+        {{ $chat->parent->full_name ?? 'Не указан' }}
+    
+    @elseif(auth()->user()->isEducator() && $chat->type === 'admin_educator')
+    <svg class="w-6 h-6 text-[#D32F2F] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+      </svg>
+        Администрация
+    
+    @elseif(auth()->user()->isAdmin() && $chat->type === 'parent_admin')
+    <svg class="w-6 h-6 text-[#D32F2F] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+      </svg>
+        {{ $chat->parent->full_name ?? 'Родитель' }}
+    
+    @elseif(auth()->user()->isAdmin() && $chat->type === 'admin_educator')
+    <svg class="w-6 h-6 text-[#D32F2F] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+      </svg>
+        {{ $chat->participant->full_name ?? 'Воспитатель' }}
+    @endif
     </h2>
   </div>
   
   <div class="h-96 overflow-y-auto p-6" id="messages-container">
-<<<<<<< HEAD
 
 @foreach($chat->messages as $message)
 <div class="mb-4 @if($message->sender_id == auth()->id()) text-right @endif" id="message-{{ $message->id }}">
@@ -49,25 +76,6 @@
   </div>
 </div>
 @endforeach
-=======
-    @foreach($chat->messages as $message)
-    <div class="mb-4 @if($message->sender_id == auth()->id()) text-right @endif">
-      <div class="@if($message->sender_id == auth()->id()) bg-purple-100 @else bg-gray-100 @endif inline-block rounded-lg px-4 py-2 max-w-xs md:max-w-md">
-        <p>{{ $message->content }}</p>
-        <p class="text-xs text-gray-500 mt-1">
-          {{ $message->created_at->format('d.m.Y H:i') }}
-          @if($message->sender_id == auth()->id())
-            @if($message->is_read)
-              <span class="text-green-500">✓ Прочитано</span>
-            @else
-              <span class="text-gray-500">✓ Отправлено</span>
-            @endif
-          @endif
-        </p>
-      </div>
-    </div>
-    @endforeach
->>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
   </div>
   
   <div class="p-6 border-t border-gray-200">
@@ -159,7 +167,6 @@ document.addEventListener('DOMContentLoaded', function() {
         scrollToBottom();
     }
 
-<<<<<<< HEAD
   document.addEventListener('click', function(e) {
       if (e.target.closest('.delete-message')) {
           const messageId = e.target.closest('.delete-message').dataset.messageId;
@@ -186,8 +193,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
   });
 
-=======
->>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
     function checkMessageStatuses() {
         if (myUnreadMessages.length === 0) return;
 
@@ -280,11 +285,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isPolling) checkNewMessages();
     });
 });
-<<<<<<< HEAD
 
 
 
-=======
->>>>>>> ab11bb343f655af4f50408e4d70a2344b89856cd
 </script>
 @endsection

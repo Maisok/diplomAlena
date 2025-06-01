@@ -8,22 +8,28 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    
     public function index(Request $request)
     {
         if (!auth()->user()->isAdmin()) {
             return redirect()->route('home');
         }
+    
         $search = $request->input('search');
+        $status = $request->input('status');
     
         $users = User::query()
             ->when($search, function ($query, $search) {
-                return $query->where(function ($query) use ($search) {
-                    $query->where('first_name', 'like', '%' . $search . '%')
-                        ->orWhere('last_name', 'like', '%' . $search . '%')
-                        ->orWhere('patronymic', 'like', '%' . $search . '%');
+                $query->where(function ($q) use ($search) {
+                    $q->where('first_name', 'like', "%$search%")
+                      ->orWhere('last_name', 'like', "%$search%")
+                      ->orWhere('patronymic', 'like', "%$search%");
                 });
             })
-            ->paginate(10); 
+            ->when($status, function ($query, $status) {
+                $query->where('status', $status);
+            })
+            ->paginate(10);
     
         return view('admin.users.index', compact('users'));
     }
@@ -45,7 +51,7 @@ class UserController extends Controller
             'last_name' => 'required|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
             'first_name' => 'required|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
             'patronymic' => 'nullable|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
-            'status' => 'required|in:parent,educator',
+            'status' => 'required|in:parent,educator,nanny',
             'phone_number' => 'required|string|max:20|regex:/^8 \d{3} \d{3} \d{2} \d{2}$/|unique:users,phone_number',
             'email' => 'required|email|max:100|regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/|unique:users,email',
             'login' => 'required|string|max:5|min:5|unique:users,login',
@@ -84,7 +90,7 @@ class UserController extends Controller
             'last_name' => 'required|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
             'first_name' => 'required|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
             'patronymic' => 'nullable|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
-            'status' => 'required|in:parent,educator',
+           'status' => 'required|in:parent,educator,nanny',
             'phone_number' => [
                 'required',
                 'string',
@@ -113,6 +119,7 @@ class UserController extends Controller
             'phone_number.regex' => 'Телефон должен быть в формате: 8 999 123 45 67',
             'email.regex' => 'Введите корректный email адрес',
             'login.max' => 'Логин не должен превышать 50 символов',
+            'password.min' => 'Пароль не должен быть менее 8 символов',
             'password.max' => 'Пароль не должен превышать 255 символов',
         ]);
 

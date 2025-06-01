@@ -89,11 +89,26 @@ class User extends Authenticatable
             ->first();
     }
 
+    public function getAdminChatEducator()
+    {
+        return Chat::where('type', 'educator_admin')
+            ->where('participant_id', $this->id)
+            ->with(['messages' => function($query) {
+                $query->latest()->limit(1);
+            }])
+            ->first();
+    }
+
     public function educatorChats()
     {
         return $this->hasMany(Chat::class, 'parent_id')
             ->where('type', 'parent_educator')
             ->with(['participant', 'lastMessage']); 
+    }
+
+    public function trustedPeople()
+    {
+        return $this->hasMany(TrustedPerson::class, 'parent_id');
     }
 
     /**

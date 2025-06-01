@@ -71,7 +71,7 @@
                             <input type="text" name="patronymic" id="patronymic" value="{{ $user->patronymic }}"
                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A3F9B] focus:border-[#4A3F9B] transition" maxlength="50">
                         </div>
-                        @if (!$user->status == 'admin')
+                        
                         <div>
                             <label for="status" class="block text-gray-700 font-medium mb-2">Статус</label>
                             <select name="status" id="status" 
@@ -79,9 +79,9 @@
                                     required>
                                     <option value="parent" {{ $user->status == 'parent' ? 'selected' : '' }}>Родитель</option>
                                     <option value="educator" {{ $user->status == 'educator' ? 'selected' : '' }}>Воспитатель</option>
+                                    <option value="nanny" {{ $user->status == 'nanny' ? 'selected' : '' }}>Няня</option>
                             </select>
                         </div>
-                        @endif
 
                         <div>
                             <label for="phone_number" class="block text-gray-700 font-medium mb-2">Телефон</label>
@@ -108,7 +108,7 @@
                             <label for="password" class="block text-gray-700 font-medium mb-2">Пароль</label>
                             <input type="password" name="password" id="password" 
                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A3F9B] focus:border-[#4A3F9B] transition"
-                                   required>
+                                   >
                         </div>
 
                         <button type="submit" 

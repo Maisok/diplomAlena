@@ -28,4 +28,12 @@ class Group extends Model
     {
         return $this->hasMany(ScheduleItem::class);
     }
+
+    public function getFormattedScheduleAttribute()
+    {
+        return $this->scheduleItems->groupBy(function ($item) {
+            $date = is_string($item->date) ? \Carbon\Carbon::parse($item->date) : $item->date;
+            return $date->dayOfWeekIso;
+        });
+    }
 }

@@ -19,7 +19,22 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\ActivityCategoryController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\AdminGalleryController;
+use App\Http\Controllers\GroupScheduleController;
+use App\Http\Controllers\TrustedPersonController;
 
+
+
+Route::prefix('trusted-people')->name('trusted-people.')->middleware('auth')->group(function () {
+    Route::get('/', [TrustedPersonController::class, 'index'])->name('index');
+    Route::get('/create', [TrustedPersonController::class, 'create'])->name('create');
+    Route::post('/', [TrustedPersonController::class, 'store'])->name('store');
+    Route::get('/{trusted_person}/edit', [TrustedPersonController::class, 'edit'])->name('edit');
+    Route::put('/{trusted_person}', [TrustedPersonController::class, 'update'])->name('update');
+    Route::delete('/{trusted_person}', [TrustedPersonController::class, 'destroy'])->name('destroy');
+});
+
+Route::get('/group-schedules', [GroupScheduleController::class, 'index'])
+    ->name('group.schedules');
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::view('/company', 'company')->name('company');
@@ -50,6 +65,8 @@ Route::middleware(['auth'])->group(function () {
 
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/chats/start-with-educator/{educator}', [ChatController::class, 'startWithEducatorFromAdmin'])->name('chats.startWithEducatorFromAdmin');
+    Route::get('/chats/start-with-admin', [ChatController::class, 'startWithAdminEducator'])->name('chats.startWithAdmin');
     // Основные маршруты чатов
     Route::get('/chats', [ChatController::class, 'index'])->name('chats.index');
     Route::get('/chats/{chat}', [ChatController::class, 'show'])->name('chats.show');

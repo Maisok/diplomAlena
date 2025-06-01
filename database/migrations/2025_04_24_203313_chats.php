@@ -16,13 +16,14 @@ return new class extends Migration
             $table->string('type', 20); // 'parent_educator' или 'parent_admin'
             $table->foreignId('parent_id')->constrained('users');
             $table->foreignId('participant_id')->constrained('users');
+            $table->foreign('admin_id')->references('id')->on('users');
             $table->timestamps();
             
             $table->unique(['parent_id', 'participant_id', 'type']);
         });
     }
 
-    /**
+    /**я
      * Reverse the migrations.
      */
     public function down(): void

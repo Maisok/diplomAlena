@@ -78,6 +78,7 @@
                                     required>
                                 <option value="parent">Родитель</option>
                                 <option value="educator">Воспитатель</option>
+                                <option value="nanny">Няня</option>
                             </select>
                         </div>
 

@@ -60,9 +60,9 @@ class GroupController extends Controller
         if (!auth()->user()->isAdmin()) {
             return redirect()->route('home');
         }
-        $educators = User::where('status', 'educator')
-            ->with('groups')
-            ->get();
+        $educators = User::whereIn('status', ['educator', 'nanny'])
+        ->with('groups')
+        ->get();
             
         return view('admin.groups.edit', compact('group', 'educators'));
     }

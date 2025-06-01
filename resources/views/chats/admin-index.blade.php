@@ -4,54 +4,90 @@
 @section('page-subtitle', 'Общайтесь с родителями ваших воспитанников')
 
 @section('content')
-<div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg hover-scale animate-fade-in-up">
-  <div class="p-6">
-    <div class="grid grid-cols-1 gap-6" id="parent-chats-list">
-      @forelse($chats as $chat)
-        <div class="border-b border-gray-200 pb-6 last:border-0 last:pb-0 chat-item" data-chat-id="{{ $chat->id }}">
-          <div class="flex justify-between items-start">
-            <div>
-              <h2 class="text-lg font-semibold">{{ $chat->parent->full_name }}</h2>
-              <p class="text-gray-600 text-sm mt-1">
-                Ребенок: {{ $chat->parent->children->first()->full_name ?? 'Не указан' }}
-              </p>
-            </div>
-            
-            <div class="text-right">
-              <p class="text-sm text-gray-500 last-message-time-{{ $chat->id }}">
-                {{ $chat->lastMessage ? $chat->lastMessage->created_at->diffForHumans() : 'Нет сообщений' }}
-              </p>
-              <span class="chat-badge-{{ $chat->id }} inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full"
-                    style="display: {{ $chat->unreadMessagesCount() > 0 ? 'inline-flex' : 'none' }}">
-                {{ $chat->unreadMessagesCount() }}
-              </span>
-            </div>
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold text-[#4A3F9B] mb-6">Управление чатами</h1>
+  
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Поиск и существующие чаты -->
+      <div class="lg:col-span-2">
+          <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+              <form method="GET" action="{{ route('chats.index') }}" class="flex gap-4">
+                  <div class="relative flex-grow">
+                      <input type="text" name="search" placeholder="Поиск по ФИО"
+                             value="{{ request('search') }}"
+                             class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                  </div>
+                  <button type="submit" class="bg-gradient-to-r from-[#4A3F9B] to-[#D32F2F] text-white px-6 py-3 rounded-lg hover:opacity-90 transition">
+                      Найти
+                  </button>
+              </form>
           </div>
+
+          <h2 class="text-xl font-bold text-[#4A3F9B] mb-4">Активные чаты</h2>
           
-          <div class="mt-4">
-            <p class="text-gray-700 last-message-content-{{ $chat->id }}">
-              {{ $chat->lastMessage ? Str::limit($chat->lastMessage->content, 100) : 'Чат начат' }}
-            </p>
+          @forelse($chats as $chat)
+              <div class="bg-white rounded-xl shadow-md p-5 mb-4 hover:shadow-lg transition-shadow">
+                  <div class="flex justify-between items-start mb-3">
+                      <div>
+                          <h3 class="font-semibold">{{ optional($chat->participant)->full_name }}</h3>
+                          <p class="text-gray-600 text-sm">Воспитатель</p>
+                      </div>
+                      <div class="flex items-center">
+                          <span class="text-sm text-gray-500 last-message-time-{{ $chat->id }} mr-2">
+                              {{ optional($chat->lastMessage)->created_at ? $chat->lastMessage->created_at->diffForHumans() : 'Нет сообщений' }}
+                          </span>
+                          <span class="chat-badge-{{ $chat->id }} inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 rounded-full"
+                                style="display: {{ $chat->unreadMessagesCount() > 0 ? 'inline-flex' : 'none' }}">
+                              {{ $chat->unreadMessagesCount() }}
+                          </span>
+                      </div>
+                  </div>
+                  
+                  <p class="text-gray-700 mb-4 last-message-content-{{ $chat->id }}">
+                      {{ optional($chat->lastMessage)->content ? Str::limit($chat->lastMessage->content, 80) : 'Чат начат' }}
+                  </p>
+                  
+                  <a href="{{ route('chats.show', $chat) }}" class="text-[#4A3F9B] hover:text-[#D32F2F] font-medium inline-flex items-center transition-colors">
+                      Перейти к чату
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                  </a>
+              </div>
+          @empty
+              <div class="bg-white rounded-xl shadow-md p-8 text-center">
+                  <p class="text-gray-500">У вас пока нет активных чатов</p>
+              </div>
+          @endforelse
+      </div>
+
+      <!-- Список воспитателей для нового чата -->
+      <div>
+          <div class="bg-white rounded-xl shadow-md p-6 sticky top-4">
+              <h2 class="text-xl font-bold text-[#4A3F9B] mb-4">Начать новый чат</h2>
+              
+              @if($educatorsWithoutChat->isNotEmpty())
+                  <ul class="space-y-3">
+                      @foreach($educatorsWithoutChat as $educator)
+                          <li class="p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
+                              <div class="flex justify-between items-center">
+                                  <div>
+                                      <h3 class="font-medium">{{ $educator->full_name }}</h3>
+                                      <p class="text-sm text-gray-500">ID: {{ $educator->id }}</p>
+                                  </div>
+                                  <a href="{{ route('chats.startWithEducatorFromAdmin', $educator) }}"
+                                     class="px-4 py-2 bg-[#4A3F9B] text-white rounded-lg hover:bg-[#D32F2F] transition text-sm">
+                                      Чат
+                                  </a>
+                              </div>
+                          </li>
+                      @endforeach
+                  </ul>
+              @else
+                  <p class="text-gray-500 text-center py-4">У вас уже есть чаты со всеми воспитателями</p>
+              @endif
           </div>
-          
-          <div class="mt-4">
-            <a href="{{ route('chats.show', $chat) }}" class="text-purple-600 hover:text-purple-800 font-medium inline-flex items-center">
-              Перейти к чату
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
-          </div>
-        </div>
-      @empty
-        <div class="text-center py-8">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-          </svg>
-          <p class="text-gray-500">У вас пока нет активных чатов с родителями</p>
-        </div>
-      @endforelse
-    </div>
+      </div>
   </div>
 </div>
 @endsection

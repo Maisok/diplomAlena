@@ -54,19 +54,28 @@
                 @endif
 
                 <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-                    <form action="{{ route('users.index') }}" method="GET" class="flex-1">
-                        <div class="flex">
-                            <input type="text" name="search" 
-                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-[#4A3F9B] focus:border-[#4A3F9B] transition"
+                    <form action="{{ route('users.index') }}" method="GET" class="flex-1 flex flex-wrap gap-2">
+                        <div class="flex-grow min-w-[200px]">
+                            <input type="text" name="search"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A3F9B] focus:border-[#4A3F9B] transition"
                                    placeholder="Поиск по ФИО" value="{{ request('search') }}">
-                            <button type="submit" 
-                                    class="bg-[#4A3F9B] text-white px-4 py-2 rounded-r-lg hover:bg-[#3a2f8b] transition">
-                                Поиск
-                            </button>
                         </div>
+                
+                        <select name="status" id="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A3F9B] focus:border-[#4A3F9B] transition">
+                            <option value="">Все статусы</option>
+                            <option value="admin" {{ request('status') == 'admin' ? 'selected' : '' }}>Админ</option>
+                            <option value="educator" {{ request('status') == 'educator' ? 'selected' : '' }}>Воспитатель</option>
+                            <option value="parent" {{ request('status') == 'parent' ? 'selected' : '' }}>Родитель</option>
+                            <option value="parent" {{ request('status') == 'nanny' ? 'selected' : '' }}>Родитель</option>
+                        </select>
+                
+                        <button type="submit"
+                                class="bg-[#4A3F9B] text-white px-6 py-2 rounded-lg hover:bg-[#3a2f8b] transition whitespace-nowrap">
+                            Применить
+                        </button>
                     </form>
-
-                    <a href="{{ route('users.create') }}" 
+                
+                    <a href="{{ route('users.create') }}"
                        class="gradient-bg text-white px-6 py-2 rounded-lg hover:opacity-90 transition whitespace-nowrap">
                         Добавить пользователя
                     </a>
@@ -96,8 +105,13 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                             {{ $user->status == 'admin' ? 'bg-purple-100 text-purple-800' : 
-                                               ($user->status == 'educator' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800') }}">
-                                            {{ $user->status }}
+                                               ($user->status == 'educator' ? 'bg-blue-100 text-blue-800' : 
+                                               ($user->status == 'nanny' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800')) }}">
+                                            {{
+                                                $user->status == 'admin' ? 'Администратор' :
+                                                ($user->status == 'educator' ? 'Воспитатель' :
+                                                ($user->status == 'nanny' ? 'Няня' : 'Родитель'))
+                                            }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
