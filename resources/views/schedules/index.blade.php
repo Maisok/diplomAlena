@@ -49,7 +49,7 @@
         </div>
 
         <div class="container mx-auto px-4 py-8">
-            <div class="flex justify-between items-center mb-8 bg-white rounded-lg shadow-md p-4">
+            <div class="flex justify-between items-center bg-white rounded-lg shadow-md p-4">
                 @if($weekStart->gt($today->copy()->startOfWeek()))
                     <a href="{{ route('schedules.index', ['week_start' => $weekStart->copy()->subWeek()->toDateString()]) }}" 
                     class="gradient-bg text-white px-6 py-2 rounded-lg hover:opacity-90 transition">
@@ -72,7 +72,10 @@
                     <span class="bg-gray-300 text-gray-600 px-6 py-2 rounded-lg">Следующая неделя</span>
                 @endif
             </div>
-
+            <form action="{{ route('schedule.clear_past') }}" method="POST" onsubmit="return confirm('Вы уверены, что хотите очистить расписание за прошлые недели?');">
+                @csrf
+                <button type="submit" class="gradient-bg text-white px-6 py-2 my-4 rounded-lg hover:opacity-90 transition">Очистить прошлые недели</button>
+            </form>
             @if($errors->any())
                 <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg">
                     <h4 class="font-bold">Ошибки:</h4>

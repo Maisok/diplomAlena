@@ -42,21 +42,37 @@
 
 <section class="py-12">
     <div class="container mx-auto px-4">
-        <h1 class="text-3xl font-bold gradient-text mb-8 text-center">Расписание всех групп</h1>
+        <h1 class="text-3xl font-bold gradient-text mb-8 text-center">Расписание на текущую неделю</h1>
+
+        <!-- Форма фильтрации по группе -->
+        <form method="GET" action="{{ route('group.schedules') }}" class="mb-6 max-w-xl mx-auto">
+            <label for="group_id" class="block text-sm font-medium text-gray-700 mb-2">Выберите группу:</label>
+            <select id="group_id" name="group_id" onchange="this.form.submit()" class="w-full p-2 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+                <option value="">Все группы</option>
+                @foreach($allGroups as $groupOption)
+                    <option value="{{ $groupOption->id }}" {{ $selectedGroupId == $groupOption->id ? 'selected' : '' }}>
+                        {{ $groupOption->name }}
+                    </option>
+                @endforeach
+            </select>
+        </form>
 
         <!-- Карточки групп -->
-        @foreach($groups as $group)
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover-scale animate-fade-in-up mb-8 max-w-6xl mx-auto">
-        <div class="bg-gradient-to-r from-purple-500 to-purple-700 p-6 text-white flex justify-between items-center">
-            <h2 class="text-xl font-bold">Группа {{ $group->name }}</h2>
-        </div>
+        @if($groups->isEmpty())
+            <p class="text-center text-gray-500 text-lg">Нет данных о расписании на текущую неделю.</p>
+        @else
+            @foreach($groups as $group)
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover-scale animate-fade-in-up mb-8 max-w-6xl mx-auto">
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-700 p-6 text-white flex justify-between items-center">
+                        <h2 class="text-xl font-bold">Группа {{ $group->name }}</h2>
+                    </div>
 
-        <div class="p-6">
-            <!-- Расписание -->
-            @include('partials.group_schedule', ['schedule_items' => $group->formatted_schedule])
-        </div>
-    </div>
-@endforeach
+                    <div class="p-6">
+                        @include('partials.group_schedule', ['schedule_items' => $group->formatted_schedule])
+                    </div>
+                </div>
+            @endforeach
+        @endif
     </div>
 </section>
 

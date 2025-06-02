@@ -148,6 +148,8 @@ Route::middleware(['auth'])->group(function () {
     // Удаление категории
     Route::delete('activity-categories/{activityCategory}', [ActivityCategoryController::class, 'destroy'])
         ->name('activity-categories.destroy');
+
+    Route::post('/schedule/clear-past', [ScheduleController::class, 'clearPast'])->name('schedule.clear_past');
 });
 
 

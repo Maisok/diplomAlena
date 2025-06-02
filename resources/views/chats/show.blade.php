@@ -2,88 +2,89 @@
 
 @section('page-title', 'ЧАТ')
 @section('page-subtitle', 'Общение с ' . 
-    (
-        match($chat->type) {
-            'parent_educator' => $chat->participant->full_name,
-            'parent_admin' => 'администрацией',
-            'admin_educator' => auth()->user()->isAdmin() ? $chat->participant->full_name : 'администрацией',
-            default => 'пользователем'
-        }
-    )
+    match($chat->type) {
+        'parent_admin' => auth()->user()->isParent() ? 'администрацией' : ($chat->parent->full_name ?? 'пользователем'),
+        'admin_educator' => auth()->user()->isEducator() ? 'администрацией' : ($chat->participant->full_name ?? 'воспитателем'),
+        'parent_educator' => auth()->user()->isParent() ? ($chat->participant->full_name ?? 'воспитателем') : ($chat->parent->full_name ?? 'родителем'),
+        default => 'пользователем'
+    }
 )
 
 @section('content')
-<div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg hover-scale animate-fade-in-up">
+<div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg animate-fade-in-up">
   <div class="p-6 border-b border-gray-200">
     <h2 class="text-xl font-semibold flex items-center">
-        @if(auth()->user()->isParent())
+        <!-- Иконка пользователя -->
         <svg class="w-6 h-6 text-[#D32F2F] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-          </svg>
-        {{ $chat->participant->full_name ?? 'Не указан' }}
-    
-    @elseif(auth()->user()->isEducator() && $chat->type === 'parent_educator')
-    <svg class="w-6 h-6 text-[#D32F2F] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-      </svg>
-        {{ $chat->parent->full_name ?? 'Не указан' }}
-    
-    @elseif(auth()->user()->isEducator() && $chat->type === 'admin_educator')
-    <svg class="w-6 h-6 text-[#D32F2F] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-      </svg>
-        Администрация
-    
-    @elseif(auth()->user()->isAdmin() && $chat->type === 'parent_admin')
-    <svg class="w-6 h-6 text-[#D32F2F] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-      </svg>
-        {{ $chat->parent->full_name ?? 'Родитель' }}
-    
-    @elseif(auth()->user()->isAdmin() && $chat->type === 'admin_educator')
-    <svg class="w-6 h-6 text-[#D32F2F] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-      </svg>
-        {{ $chat->participant->full_name ?? 'Воспитатель' }}
-    @endif
+        </svg>
+
+        <!-- Динамическое имя собеседника -->
+        @if($chat->type === 'parent_admin')
+            @if(auth()->user()->isParent())
+                Администрация
+            @else
+                {{ $chat->parent->full_name ?? 'Родитель' }}
+            @endif
+
+        @elseif($chat->type === 'admin_educator')
+            @if(auth()->user()->isEducator())
+                Администрация
+            @else
+                {{ $chat->participant->full_name ?? 'Воспитатель' }}
+            @endif
+
+        @elseif($chat->type === 'parent_educator')
+            @if(auth()->user()->isParent())
+                {{ $chat->participant->full_name ?? 'Воспитатель' }}
+            @else
+                {{ $chat->parent->full_name ?? 'Родитель' }}
+            @endif
+        @endif
     </h2>
   </div>
-  
-  <div class="h-96 overflow-y-auto p-6" id="messages-container">
 
-@foreach($chat->messages as $message)
-<div class="mb-4 @if($message->sender_id == auth()->id()) text-right @endif" id="message-{{ $message->id }}">
-  <div class="@if($message->sender_id == auth()->id()) bg-purple-100 @else bg-gray-100 @endif inline-block rounded-lg px-4 py-2 max-w-xs md:max-w-md relative">
-    @if((auth()->user()->isAdmin() || auth()->user()->isEducator()) && $message->sender_id != auth()->id())
-      <button class="absolute top-0 right-0 p-1 text-gray-500 hover:text-red-500 delete-message" 
-              data-message-id="{{ $message->id }}" title="Удалить сообщение">
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      </button>
-    @endif
-    <p>{{ $message->content }}</p>
-    <p class="text-xs text-gray-500 mt-1">
-      {{ $message->created_at->format('d.m.Y H:i') }}
-      @if($message->sender_id == auth()->id())
-        @if($message->is_read)
-          <span class="text-green-500">✓ Прочитано</span>
-        @else
-          <span class="text-gray-500">✓ Отправлено</span>
-        @endif
-      @endif
-    </p>
+  <!-- Сообщения -->
+  <div class="h-96 overflow-y-auto p-6" id="messages-container">
+    @foreach($chat->messages as $message)
+      <div class="mb-4 @if($message->sender_id == auth()->id()) text-right @endif" id="message-{{ $message->id }}">
+        <div class="@if($message->sender_id == auth()->id()) bg-purple-100 @else bg-gray-100 @endif inline-block rounded-lg px-4 py-2 max-w-xs md:max-w-md relative">
+          <!-- Кнопка удаления -->
+          @if((auth()->user()->isAdmin() || auth()->user()->isEducator()) && $message->sender_id != auth()->id())
+            <button class="absolute top-0 right-0 p-1 text-gray-500 hover:text-red-500 delete-message"
+                    data-message-id="{{ $message->id }}" title="Удалить сообщение">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          @endif
+
+          <!-- Текст сообщения -->
+          <p>{{ $message->content }}</p>
+
+          <!-- Время и статус -->
+          <p class="text-xs text-gray-500 mt-1">
+            {{ $message->created_at->format('d.m.Y H:i') }}
+            @if($message->sender_id == auth()->id())
+              @if($message->is_read)
+                <span class="text-green-500">✓ Прочитано</span>
+              @else
+                <span class="text-gray-500">✓ Отправлено</span>
+              @endif
+            @endif
+          </p>
+        </div>
+      </div>
+    @endforeach
   </div>
-</div>
-@endforeach
-  </div>
-  
+
+  <!-- Форма отправки сообщения -->
   <div class="p-6 border-t border-gray-200">
     <form id="message-form" action="{{ route('chats.messages.store', $chat) }}" method="POST">
       @csrf
       <div class="flex">
         <input type="text" name="content" id="message-input" maxlength="2000"
-               placeholder="Напишите сообщение..." 
+               placeholder="Напишите сообщение..."
                class="flex-1 border rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
         <button type="submit" class="bg-gradient-to-r from-[#4A3F9B] to-[#D32F2F] text-white px-6 py-2 rounded-r-lg hover:opacity-90 transition">
           Отправить

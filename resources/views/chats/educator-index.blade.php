@@ -21,7 +21,40 @@
         </form>
     </div>
 
-    <!-- Список чатов -->
+    <!-- Чат с администратором -->
+    @if(isset($adminChat) && $adminChat)
+        <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-5 mb-8">
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    <h3 class="text-lg font-semibold text-[#4A3F9B]">Администратор</h3>
+                    <p class="text-gray-600 text-sm">Служебный чат</p>
+                </div>
+                <div class="flex items-center">
+                    <span class="text-sm text-gray-500 last-message-time-admin mr-2">
+                        {{ optional($adminChat->lastMessage)->created_at ? $adminChat->lastMessage->created_at->diffForHumans() : 'Нет сообщений' }}
+                    </span>
+                    <span class="chat-badge-admin inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 rounded-full"
+                          style="display: {{ $adminChat->unreadMessagesCount() > 0 ? 'inline-flex' : 'none' }}">
+                        {{ $adminChat->unreadMessagesCount() }}
+                    </span>
+                </div>
+            </div>
+            
+            <p class="text-gray-700 mb-4 last-message-content-admin">
+                {{ optional($adminChat->lastMessage)->content ? Str::limit($adminChat->lastMessage->content, 80) : 'Чат начат' }}
+            </p>
+            
+            <a href="{{ route('chats.show', $adminChat) }}" 
+               class="text-[#4A3F9B] hover:text-[#D32F2F] font-medium inline-flex items-center transition-colors">
+                Перейти к чату
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+    @endif
+
+    <!-- Список чатов с родителями -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         @forelse($chats as $chat)
             <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-5">
@@ -29,7 +62,7 @@
                     <div>
                         <h3 class="text-lg font-semibold text-[#4A3F9B]">{{ optional($chat->parent)->full_name }}</h3>
                         <p class="text-gray-600 text-sm">
-                            Ребенок: {{ optional(optional($chat->parent)->children->first())->full_name ?? 'Не указан' }}
+                            Ребенок: {{ optional(optional($chat->parent)->children->first())->first_name ?? 'Не указан' }}
                         </p>
                     </div>
                     <div class="flex items-center">

@@ -26,15 +26,7 @@
 <x-header/>
 
 <main class="flex-grow">
-    @if ($errors->any())
-    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
-        <ul class="space-y-1">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
+   
     <div class="bg-gradient-to-r from-purple-100 to-white py-12">
         <div class="container mx-auto px-4 text-center">
             <h1 class="text-3xl font-bold gradient-text mb-2">Добавить доверенное лицо</h1>
@@ -42,6 +34,15 @@
     </div>
 
     <div class="container mx-auto px-4 py-12">
+        @if ($errors->any())
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
+            <ul class="space-y-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
         <div class="max-w-md mx-auto bg-white rounded-xl shadow-lg hover:shadow-xl transition">
             <div class="p-6">
                 <form action="{{ route('trusted-people.store') }}" method="POST">

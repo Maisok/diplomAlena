@@ -151,4 +151,19 @@ class ScheduleController extends Controller
         $scheduleItem->delete();
         return back()->with('success', 'Мероприятие удалено');
     }
+
+    public function clearPast()
+    {
+        if (!auth()->user()->isAdmin()) {
+            return redirect()->route('home');
+        }
+
+        // Определяем начало текущей недели (понедельник)
+        $currentWeekStart = Carbon::now()->startOfWeek();
+
+        // Удаляем все записи до начала этой недели
+        ScheduleItem::where('date', '<', $currentWeekStart->format('Y-m-d'))->delete();
+
+        return back()->with('success', 'Расписание за прошлые недели успешно очищено');
+    }
 }

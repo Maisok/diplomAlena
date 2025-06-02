@@ -14,15 +14,18 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class GroupScheduleExport implements FromArray, WithHeadings, WithTitle, WithStyles
 {
     protected $group;
-
-    public function __construct(Group $group)
+    protected $weekStart;
+    protected $weekEnd;
+    
+    public function __construct(Group $group, $weekStart, $weekEnd)
     {
         $this->group = $group;
+        $this->weekStart = $weekStart;
+        $this->weekEnd = $weekEnd;
     }
 
     public function array(): array
     {
-        // Подготавливаем дни недели
         $days = [
             1 => 'Понедельник',
             2 => 'Вторник',
@@ -30,31 +33,29 @@ class GroupScheduleExport implements FromArray, WithHeadings, WithTitle, WithSty
             4 => 'Четверг',
             5 => 'Пятница'
         ];
-
-        // Подготавливаем временные слоты
+    
         $timeSlots = [];
         for ($hour = 7; $hour <= 18; $hour++) {
             $startTime = sprintf('%02d:00', $hour);
             $endTime = sprintf('%02d:00', $hour + 1);
             $timeSlots[$startTime] = "$startTime – $endTime";
         }
-
-        // Загружаем расписание
+    
         $scheduleItems = $this->group->scheduleItems()
             ->with('activityCategory')
+            ->whereBetween('date', [$this->weekStart->toDateString(), $this->weekEnd->toDateString()])
             ->get()
             ->groupBy(fn($item) => \Carbon\Carbon::parse($item->date)->dayOfWeekIso);
-
-        // Формируем данные
+    
         $data = [];
-
+    
         foreach ($timeSlots as $timeLabel => $fullTime) {
             $row = [$timeLabel];
-
+    
             foreach ([1, 2, 3, 4, 5] as $dayNum) {
                 $activities = collect($scheduleItems->get($dayNum, []))
                     ->filter(fn($item) => date('H:i', strtotime($item->start_time)) == $timeLabel);
-
+    
                 if ($activities->isNotEmpty()) {
                     $text = '';
                     foreach ($activities as $act) {
@@ -65,13 +66,12 @@ class GroupScheduleExport implements FromArray, WithHeadings, WithTitle, WithSty
                     $row[] = '';
                 }
             }
-
+    
             $data[] = $row;
         }
-
+    
         return $data;
     }
-
     public function headings(): array
     {
         return ['Время', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница'];

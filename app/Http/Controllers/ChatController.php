@@ -90,13 +90,16 @@ class ChatController extends Controller
             }
     
             $chats = $chatsQuery
-                ->with(['parent', 'participant', 'messages' => function($query) {
+            ->with([
+                'parent' => function ($query) {
+                    $query->with('children');
+                },
+                'participant',
+                'messages' => function($query) {
                     $query->latest()->limit(1);
-                }])
-                ->get()
-                ->sortByDesc(function($chat) {
-                    return optional($chat->messages->first())->created_at ?? $chat->created_at;
-                });
+                }
+            ])
+            ->get();
     
             // Список воспитателей без чата
             $allEducators = User::where('status', 'educator')->get();

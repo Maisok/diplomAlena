@@ -66,7 +66,7 @@
                             <option value="admin" {{ request('status') == 'admin' ? 'selected' : '' }}>Админ</option>
                             <option value="educator" {{ request('status') == 'educator' ? 'selected' : '' }}>Воспитатель</option>
                             <option value="parent" {{ request('status') == 'parent' ? 'selected' : '' }}>Родитель</option>
-                            <option value="parent" {{ request('status') == 'nanny' ? 'selected' : '' }}>Родитель</option>
+                            <option value="parent" {{ request('status') == 'nanny' ? 'selected' : '' }}>Няня</option>
                         </select>
                 
                         <button type="submit"
