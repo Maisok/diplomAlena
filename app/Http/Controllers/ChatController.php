@@ -20,15 +20,17 @@ class ChatController extends Controller
     
         if ($user->isParent()) {
             // --- Логика для родителя ---
-            $chatsQuery = Chat::where('type', 'parent_educator')
-                ->where('parent_id', $user->id);
-    
+            $chatsQuery = Chat::where(function($q) use ($user) {
+                $q->where('type', 'parent_educator')->where('parent_id', $user->id)
+                  ->orWhere('type', 'parent_admin')->where('participant_id', $user->id);
+            });
+        
             if ($searchQuery) {
                 $chatsQuery->whereHas('participant', function($query) use ($searchQuery) {
                     $query->where(DB::raw("CONCAT(last_name, ' ', first_name, ' ', patronymic)"), 'like', "%$searchQuery%");
                 });
             }
-    
+        
             $chats = $chatsQuery
                 ->with(['participant', 'messages' => function($query) {
                     $query->latest()->limit(1);
@@ -37,7 +39,7 @@ class ChatController extends Controller
                 ->sortByDesc(function($chat) {
                     return optional($chat->messages->first())->created_at ?? $chat->created_at;
                 });
-    
+        
             $adminChat = $user->getAdminChat();
             return view('chats.parent-index', compact('chats', 'adminChat', 'searchQuery'));
         }
@@ -201,20 +203,18 @@ class ChatController extends Controller
     }
 
     public function startWithAdmin()
-    {
-        $user = auth()->user();
+{
+    $user = auth()->user();
+    $admin = User::where('status', 'admin')->firstOrFail();
 
-        $admin = User::where('status', 'admin')->firstOrFail();
-    
-        // Единый тип чата
-        $chat = Chat::firstOrCreate([
-            'type' => 'parent_admin',
-            'participant_id' => $user->id,
-            'admin_id' => $admin->id,
-        ]);
-    
-        return redirect()->route('chats.show', $chat);
-    }
+    $chat = Chat::firstOrCreate([
+        'type' => 'parent_admin',
+        'parent_id' => $user->id,
+        'admin_id' => $admin->id,
+    ]);
+
+    return redirect()->route('chats.show', $chat);
+}
 
     public function startWithAdminEducator()
     {
@@ -280,12 +280,12 @@ class ChatController extends Controller
     
                 // Чат с админом
                 $adminChat = Chat::where('type', 'parent_admin')
-                    ->where('parent_id', $user->id)
-                    ->withCount(['messages as unread_count' => function($query) use ($user) {
-                        $query->where('is_read', false)->where('sender_id', '!=', $user->id);
-                    }])
-                    ->with(['lastMessage'])
-                    ->first();
+                ->where('parent_id', $user->id)
+                ->withCount(['messages as unread_count' => function($query) use ($user) {
+                    $query->where('is_read', false)->where('sender_id', '!=', $user->id);
+                }])
+                ->with(['lastMessage'])
+                ->first();
             }
             elseif ($user->isEducator()) {
                 // Воспитатель → чаты с родителями

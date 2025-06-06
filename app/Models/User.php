@@ -91,8 +91,13 @@ public function groups()
 
     public function getAdminChat()
     {
-        return Chat::where('parent_id', $this->id)
-            ->where('type', 'parent_admin')
+        return Chat::where('type', 'parent_admin')
+            ->where('parent_id', $this->id) // ← parent_id вместо participant_id
+            ->with([
+                'messages' => function ($q) {
+                    $q->latest()->limit(1);
+                }
+            ])
             ->first();
     }
 
