@@ -203,15 +203,12 @@ class ChatController extends Controller
     public function startWithAdmin()
     {
         $user = auth()->user();
-        if (!$user->isEducator()) {
-            abort(403, 'Только воспитатели могут начинать чат с админом');
-        }
-    
+
         $admin = User::where('status', 'admin')->firstOrFail();
     
         // Единый тип чата
         $chat = Chat::firstOrCreate([
-            'type' => 'admin_educator',
+            'type' => 'parent_admin',
             'participant_id' => $user->id,
             'admin_id' => $admin->id,
         ]);

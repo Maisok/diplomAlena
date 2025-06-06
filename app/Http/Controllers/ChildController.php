@@ -186,7 +186,7 @@ class ChildController extends Controller
                             $maxAllowed = $firstBirthDate->copy()->addMonths(6);
     
                             if ($birthDate < $minAllowed || $birthDate > $maxAllowed) {
-                                $fail("Нельзя перенести ребёнка в эту группу из-за большой разницы в возрасте.");
+                                $fail("");
                             }
                         }
                     }
