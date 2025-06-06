@@ -14,11 +14,11 @@
         <a class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:bg-[#6a56c5]" href="{{route('group.schedules')}}">
             РАСПИСАНИЕ
         </a>
-        @if(auth()->check())
+       
         <a class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:bg-[#6a56c5]" href="{{route('shownews.index')}}">
             НОВОСТИ
         </a>
-        @endif
+
         
         <a class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:bg-[#6a56c5]" href="{{route('about')}}">
             РОДИТЕЛЯМ

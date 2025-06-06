@@ -60,26 +60,23 @@
                             </div>
 
                             <div>
-                                <label for="educator_id" class="block text-sm font-medium text-gray-700 mb-2">Воспитатель или няня</label>
-                                <select name="educator_id" id="educator_id" 
-                                        class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg" required>
-                                    @foreach($educators as $user)
+                                <label for="educators" class="block text-sm font-medium text-gray-700 mb-2">Воспитатели</label>
+                                <select name="educators[]" id="educators" class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg" multiple required>
+                                    @foreach ($educators as $educator)
                                         @php
-                                            // Проверяем, есть ли у пользователя закреплённая группа
-                                            $isBusy = $user->groups->isNotEmpty() && $user->id != $group->educator_id;
+                                            $isSelected = in_array($educator->id, $assignedEducators);
+                                            $isBusy = $educator->groups_as_educator_count >= 2;
                                         @endphp
                             
-                                        <option value="{{ $user->id }}" 
-                                            {{ old('educator_id', $group->educator_id) == $user->id ? 'selected' : '' }}
-                                            {{ $isBusy ? 'disabled' : '' }}
-                                            class="{{ $isBusy ? 'disabled-option' : '' }}">
-                                            {{ $user->full_name }} ({{ $user->status === 'educator' ? 'Воспитатель' : 'Няня' }})
-                                            @if($isBusy)
-                                                — занята в "{{ $user->groups->first()->name }}"
+                                        <option value="{{ $educator->id }}" {{ $isSelected ? 'selected' : '' }} {{ $isBusy ? 'disabled' : '' }}>
+                                            {{ $educator->full_name }}
+                                            @if ($isBusy)
+                                                — занята(т) в {{ $educator->groups_as_educator_count }} группах
                                             @endif
                                         </option>
                                     @endforeach
                                 </select>
+                                <p class="mt-1 text-sm text-gray-500">Выберите от 1 до 2 воспитателей</p>
                             </div>
 
                             <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
@@ -100,5 +97,23 @@
     </main>
 
     <x-footer/>
+    <!-- jQuery и Select2 -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"  rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> 
+
+<script>
+$(document).ready(function() {
+    $('#educators').select2({
+        placeholder: "Выберите воспитателей",
+        maximumSelectionLength: 2,
+        language: {
+            maximumSelected: function () {
+                return "Можно выбрать максимум 2 воспитателя";
+            }
+        }
+    });
+});
+</script>
 </body>
 </html>

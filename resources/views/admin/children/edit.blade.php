@@ -84,11 +84,15 @@
                                         class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg" required>
                                     @foreach($groups as $group)
                                         <option value="{{ $group->id }}" 
-                                            {{ old('group_id', $child->group_id) == $group->id ? 'selected' : '' }}>
+                                            {{ old('group_id', $child->group_id ?? '') == $group->id ? 'selected' : '' }}>
                                             {{ $group->name }}
                                         </option>
                                     @endforeach
                                 </select>
+                            </div>
+                            
+                            <div id="group-age-info" class="mt-2 text-sm text-gray-500">
+                                Выберите группу, чтобы увидеть допустимый возрастной диапазон
                             </div>
 
                             <div>
@@ -134,6 +138,70 @@
         document.getElementById('birth_date').setAttribute('min', minDate.toISOString().split('T')[0]);
         document.getElementById('birth_date').setAttribute('max', maxDate.toISOString().split('T')[0]);
     </script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const groupSelect = document.getElementById('group_id');
+        const ageInfo = document.getElementById('group-age-info');
+
+        const groupAges = {
+            @foreach ($groups as $group)
+                {{ $group->id }}: {
+                    count: {{ $group->children->count() }},
+                    first_birth_date: "{{ optional($group->children->first())->birth_date }}"
+                },
+            @endforeach
+        };
+
+        function updateAgeInfo() {
+            const selectedGroupId = groupSelect.value;
+            if (!selectedGroupId) {
+                ageInfo.textContent = 'Выберите группу, чтобы увидеть допустимый возрастной диапазон';
+                return;
+            }
+
+            const group = groupAges[selectedGroupId];
+
+            if (!group || group.count === 0) {
+                ageInfo.innerHTML = `
+                    Группа пустая. Можно выбрать любого подходящего по возрасту ребёнка<br>
+                    <strong>от 1 года 6 месяцев</strong> до <strong>8 лет</strong>.
+                `;
+                return;
+            }
+
+            const firstBirthDateStr = group.first_birth_date;
+
+            if (!firstBirthDateStr) {
+                ageInfo.textContent = 'В группе нет данных о возрасте детей.';
+                return;
+            }
+
+            const firstBirthDate = new Date(firstBirthDateStr);
+            const minAllowed = new Date(firstBirthDate);
+            const maxAllowed = new Date(firstBirthDate);
+
+            minAllowed.setMonth(minAllowed.getMonth() - 6);
+            maxAllowed.setMonth(maxAllowed.getMonth() + 6);
+
+            const formatDate = (date) => {
+                return `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth()+1).padStart(2, '0')}.${date.getFullYear()}`;
+            };
+
+            const minDateFormatted = formatDate(minAllowed);
+            const maxDateFormatted = formatDate(maxAllowed);
+
+            ageInfo.innerHTML = `
+                Группа доступна для детей с датой рождения<br>
+                <strong>от ${minDateFormatted}</strong> до <strong>${maxDateFormatted}</strong>
+            `;
+        }
+
+        updateAgeInfo();
+        groupSelect.addEventListener('change', updateAgeInfo);
+    });
+</script>
 
     <x-footer/>
 </body>

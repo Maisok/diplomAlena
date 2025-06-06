@@ -55,9 +55,16 @@ class User extends Authenticatable
         return $this->hasMany(Child::class, 'parent_id');
     }
 
-    public function groups()
+   // App/Models/User.php
+
+public function groups()
+{
+    return $this->belongsToMany(Group::class, 'groups_educator', 'educator_id', 'group_id');
+}
+
+    public function groupsAsEducator()
     {
-        return $this->hasMany(Group::class, 'educator_id');
+        return $this->belongsToMany(Group::class, 'groups_educator', 'educator_id', 'group_id')->withTimestamps();
     }
 
 

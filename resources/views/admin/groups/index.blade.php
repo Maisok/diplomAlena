@@ -77,6 +77,7 @@
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Название</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Воспитатель</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Количество детей</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
                                 </tr>
                             </thead>
@@ -89,8 +90,19 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
+                                        @if($group->educators->isNotEmpty())
+                                            @foreach($group->educators as $educator)
+                                                <div class="text-sm text-gray-900">
+                                                    {{ $educator->last_name }} {{ $educator->first_name }} {{ $educator->patronymic ?? '' }}
+                                                </div>
+                                            @endforeach
+                                        @else
+                                            <div class="text-sm text-gray-500">Нет воспитателей</div>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">
-                                            {{ $group->educator->last_name }} {{ $group->educator->first_name }} {{ $group->educator->patronymic }}
+                                            {{ $group->children->count() }}
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">

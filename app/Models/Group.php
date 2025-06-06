@@ -9,14 +9,11 @@ class Group extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'educator_id',
-    ];
+    protected $fillable = ['name'];
 
-    public function educator()
+    public function educators()
     {
-        return $this->belongsTo(User::class, 'educator_id');
+        return $this->belongsToMany(User::class, 'groups_educator', 'group_id', 'educator_id')->withTimestamps();
     }
 
     public function children()

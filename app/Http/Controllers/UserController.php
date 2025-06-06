@@ -139,11 +139,25 @@ class UserController extends Controller
         if (!auth()->user()->isAdmin()) {
             return redirect()->route('home');
         }
-        if ($user->status === 'educator' && $user->groups()->exists()) {
+    
+        // Проверка для воспитателя
+        if ($user->isEducator() && $user->groups()->exists()) {
             return redirect()->route('users.index')->with('error', 'Невозможно удалить воспитателя, так как у него есть группы.');
         }
     
+        // Проверка для няни
+        if ($user->status === 'nanny' && $user->groupsAsNanny()->exists()) {
+            return redirect()->route('users.index')->with('error', 'Невозможно удалить няню, так как она закреплена за группами.');
+        }
+    
+        // Проверка для родителя
+        if ($user->isParent() && $user->children()->exists()) {
+            return redirect()->route('users.index')->with('error', 'Невозможно удалить родителя, так как у него есть дети.');
+        }
+    
+        // Если все проверки пройдены — удаляем
         $user->delete();
+    
         return redirect()->route('users.index')->with('success', 'Пользователь успешно удален.');
     }
 }

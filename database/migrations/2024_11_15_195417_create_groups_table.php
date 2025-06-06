@@ -11,7 +11,6 @@ class CreateGroupsTable extends Migration
         Schema::create('groups', function (Blueprint $table) {
             $table->id();
             $table->string('name', 100); // Например, "Старшая группа №3"
-            $table->foreignId('educator_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

@@ -59,16 +59,15 @@
                             </div>
 
                             <div>
-                                <label for="educator_id" class="block text-sm font-medium text-gray-700 mb-2">Воспитатель</label>
-                                <select name="educator_id" id="educator_id" 
-                                        class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg" required>
-                                    @foreach($educators as $educator)
-                                        <option value="{{ $educator->id }}" {{ old('educator_id') == $educator->id ? 'selected' : '' }}>
+                                <label for="educators" class="block text-sm font-medium text-gray-700 mb-2">Воспитатели</label>
+                                <select name="educators[]" id="educators" class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg" multiple required>
+                                    @foreach ($availableEducators as $educator)
+                                        <option value="{{ $educator->id }}">
                                             {{ $educator->full_name }}
                                         </option>
                                     @endforeach
                                 </select>
-                                <p class="mt-1 text-sm text-gray-500">Доступны только воспитатели без групп</p>
+                                <p class="mt-1 text-sm text-gray-500">Выберите от 1 до 2 воспитателей</p>
                             </div>
 
                             <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
@@ -89,5 +88,24 @@
     </main>
 
     <x-footer/>
+    <!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"  rel="stylesheet" />
+
+<!-- jQuery + Select2 JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> 
+<script>
+    $(document).ready(function() {
+        $('#educators').select2({
+            placeholder: "Выберите воспитателей",
+            maximumSelectionLength: 2,
+            language: {
+                maximumSelected: function (args) {
+                    return "Можно выбрать максимум 2 воспитателя";
+                }
+            }
+        });
+    });
+    </script>
 </body>
 </html>

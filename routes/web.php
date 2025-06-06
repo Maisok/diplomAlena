@@ -42,15 +42,18 @@ Route::view('/test', 'text')->name('test');
 Route::view('/about', 'about')->name('about');
 Route::get('/success', [CertificateDisplayController::class, 'index'])->name('certificates.display');
 
+
 Route::middleware(['guest'])->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
 });
 
+Route::get('/shownews', [NewsController::class, 'show'])->name('shownews.index');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/export', [ExportController::class, 'showExportForm'])->name('export.form');
     Route::post('/export', [ExportController::class, 'exportChildren'])->name('export.children');
-    Route::get('/shownews', [NewsController::class, 'show'])->name('shownews.index');
+   
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
     Route::resource('groups', GroupController::class);

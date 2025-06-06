@@ -105,20 +105,24 @@
             <p class="text-gray-700"><span class="font-medium">Логин:</span> {{ $user->login }}</p>
           </div>
           
-          @if($user->isEducator() && $group)
-              <div class="bg-purple-50 p-4 rounded-lg">
-                  <h3 class="font-semibold text-purple-700 mb-2">Группа</h3>
-                  <p class="text-gray-700"><span class="font-medium">Название:</span> {{ $group->name }}</p>
-                  <p class="text-gray-700"><span class="font-medium">Детей в группе:</span> {{ $children->count() }}</p>
-          
-                  <!-- Кнопка -->
-                  <button type="button"
-                          onclick="document.getElementById('children-modal').classList.remove('hidden')"
-                          class="mt-4 inline-flex items-center px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-medium text-sm rounded-lg shadow-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50">
-                      Посмотреть список детей
-                  </button>
-              </div>
-          @endif
+          @if($user->isEducator() && $groups->isNotEmpty())
+          <div class="bg-purple-50 p-4 rounded-lg">
+              <h3 class="font-semibold text-purple-700 mb-2">Мои группы</h3>
+              <ul class="space-y-2">
+                  @foreach ($groups as $group)
+                      <li class="text-gray-700">
+                          <span class="font-medium">Название:</span> {{ $group->name }}<br>
+                          <span class="font-medium">Детей:</span> {{ $group->children->count() }}
+                      </li>
+                  @endforeach
+              </ul>
+              <button type="button"
+                      onclick="document.getElementById('children-modal').classList.remove('hidden')"
+                      class="mt-4 inline-flex items-center px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-medium text-sm rounded-lg shadow-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50">
+                  Посмотреть список детей
+              </button>
+          </div>
+      @endif
           
           @if($user->isParent() && $children->count())
           <div class="bg-purple-50 p-4 rounded-lg">
@@ -142,38 +146,82 @@
     </div>
     
     <!-- Блок для воспитателя -->
-    @if($user->isEducator() && $group)
-    <div class="mt-12 bg-white rounded-xl shadow-lg overflow-hidden hover-scale animate-fade-in-up max-w-6xl mx-auto" style="animation-delay: 0.1s;">
-        <div class="bg-gradient-to-r from-purple-500 to-purple-700 p-6 text-white flex justify-between items-center">
-            <h2 class="text-xl font-bold">Группа {{ $group->name }}</h2>
-            
-            <!-- Выпадающий список детей -->
-            <div class="dropdown relative">
-              
-              <div class="dropdown-content mt-2 p-4">
-                <ul class="space-y-2">
-                  @foreach($children as $child)
-                  <li class="flex items-center space-x-3 p-2 hover:bg-purple-50 rounded">
-                    <span class="text-purple-700">{{ $child->last_name }} {{ $child->first_name }}</span>
-                  </li>
-                  @endforeach
-                </ul>
-              </div>
+    @if($user->isEducator() && $groups->isNotEmpty())
+    @foreach ($groups as $group)
+        <div class="mt-12 bg-white rounded-xl shadow-lg overflow-hidden hover-scale animate-fade-in-up max-w-6xl mx-auto"
+             style="animation-delay: {{ 0.1 * $loop->index }}s;">
+            <div class="bg-gradient-to-r from-purple-500 to-purple-700 p-6 text-white flex justify-between items-center">
+                <h2 class="text-xl font-bold">Группа {{ $group->name }}</h2>
             </div>
-          </div>
-      <div class="bg-gradient-to-r from-purple-500 to-purple-700 p-6 text-white">
-        <h2 class="text-xl font-bold">Расписание группы {{ $group->name }}</h2>
-        
-      </div>
-      
-     
-     <div class="p-6">
-      @include('partials.group_schedule', ['schedule_items' => $schedule_items])
-     </div>
-     
-    </div>
-    </div>
-    @endif
+
+            <!-- Расписание -->
+            <div class="p-6">
+                <h3 class="text-lg font-semibold mb-4">Расписание группы</h3>
+                @include('partials.group_schedule', ['schedule_items' => $schedule_items])
+            </div>
+
+            <!-- Список детей этой группы -->
+            @if ($group->children->isNotEmpty())
+                <div class="p-6 border-t border-gray-200">
+                    <h3 class="text-lg font-semibold mb-4">Дети группы "{{ $group->name }}"</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">ФИО ребёнка</th>
+                                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Дата рождения</th>
+                                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Родитель</th>
+                                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Телефон родителя</th>
+                                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Доверенные лица</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach ($group->children as $child)
+                                    <tr class="hover:bg-gray-50 transition duration-100">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            {{ $child->last_name }} {{ $child->first_name }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                            {{ \Carbon\Carbon::parse($child->birth_date)->format('d.m.Y') }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                            @if ($child->parent)
+                                                {{ $child->parent->last_name }} {{ $child->parent->first_name }}
+                                            @else
+                                                —
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                            @if ($child->parent)
+                                                📞 {{ $child->parent->phone_number }}
+                                            @else
+                                                —
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                            @if ($child->parent && $child->parent->trustedPeople->isNotEmpty())
+                                                <ul class="space-y-1">
+                                                    @foreach ($child->parent->trustedPeople as $person)
+                                                        <li>
+                                                            {{ $person->last_name }} {{ $person->first_name }}<br>
+                                                            📞 {{ $person->phone_number ?: '—' }}
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            @else
+                                                —
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
+        </div>
+    @endforeach
+@endif
     
     <!-- Блок для родителя -->
     @if($user->isParent() && $children->count())

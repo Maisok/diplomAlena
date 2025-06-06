@@ -44,24 +44,29 @@ class ProfileController extends Controller
 
     protected function getEducatorData($user)
     {
-        $group = $user->groups->first();
-        $children = $group ? $group->children()
-        ->with('parent.trustedPeople')
-        ->orderBy('last_name')->get() : collect();
+        $groups = $user->groupsAsEducator;
     
-        // Получаем всех родителей из группы
-        $parentIds = $children->pluck('parent_id')->unique();
+        $groupIds = $groups->pluck('id');
+        $children = \App\Models\Child::whereIn('group_id', $groupIds)->with('parent.trustedPeople')->get();
     
-        // Получаем все доверенные лица этих родителей
+        $parentIds = $children->pluck('parent_id')->filter();
         $trustedPeople = TrustedPerson::whereIn('parent_id', $parentIds)->get();
+    
+        $schedule_items = ScheduleItem::with('activityCategory')
+            ->whereIn('group_id', $groupIds)
+            ->whereBetween('date', [now()->startOfWeek(), now()->endOfWeek()])
+            ->orderBy('date')
+            ->orderBy('start_time')
+            ->get()
+            ->groupBy(fn($item) => Carbon::parse($item->date)->dayOfWeekIso);
     
         return [
             'is_educator' => true,
-            'group' => $group,
+            'groups' => $groups,
             'children' => $children,
-            'schedule_items' => $group ? $this->getGroupSchedule($group) : [],
-            'activity_categories' => ActivityCategory::all()->keyBy('id'),
+            'schedule_items' => $schedule_items,
             'trusted_people' => $trustedPeople,
+            'activity_categories' => ActivityCategory::all()->keyBy('id'),
         ];
     }
 

@@ -79,7 +79,6 @@
                                     required>
                                     <option value="parent" {{ $user->status == 'parent' ? 'selected' : '' }}>Родитель</option>
                                     <option value="educator" {{ $user->status == 'educator' ? 'selected' : '' }}>Воспитатель</option>
-                                    <option value="nanny" {{ $user->status == 'nanny' ? 'selected' : '' }}>Няня</option>
                             </select>
                         </div>
 
