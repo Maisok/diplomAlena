@@ -157,73 +157,13 @@ class ChildController extends Controller
             return redirect()->route('home');
         }
     
-        $validated = $request->validate([
+        // Получаем все данные из запроса заранее
+        $data = $request->validate([
             'last_name' => 'required|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
             'first_name' => 'required|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
             'patronymic' => 'nullable|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
-            'birth_date' => [
-                'required',
-                'date',
-                function ($attribute, $value, $fail) use ($request, $child) { // ← Добавлен $request в use
-                    $birthDate = Carbon::parse($value);
-                    $ageInYears = $birthDate->diffInYears(Carbon::now());
-    
-                    if ($ageInYears >= 8 || $birthDate->diffInMonths(Carbon::now()) < 18) {
-                        $fail('Ребенку должно быть от 18 месяцев до 8 лет.');
-                    }
-    
-                    $currentGroupId = $child->group_id;
-                    $newGroupId = $request->input('group_id'); // Теперь доступ есть
-    
-                    if ($currentGroupId != $newGroupId) {
-                        $group = Group::with(['children' => function($query) {
-                            $query->oldest('created_at');
-                        }])->find($newGroupId);
-    
-                        if ($group && $group->children->isNotEmpty()) {
-                            $firstBirthDate = Carbon::parse($group->children->first()->birth_date);
-                            $minAllowed = $firstBirthDate->copy()->subMonths(6);
-                            $maxAllowed = $firstBirthDate->copy()->addMonths(6);
-    
-                            if ($birthDate < $minAllowed || $birthDate > $maxAllowed) {
-                                $fail("");
-                            }
-                        }
-                    }
-                },
-            ],
-            'group_id' => [
-                'required',
-                'exists:groups,id',
-                function ($attribute, $value, $fail) use ($child, $request) { // ← тоже добавляем $request сюда
-                    $newGroupId = $value;
-                    $oldGroupId = $child->group_id;
-    
-                    if ($newGroupId == $oldGroupId) {
-                        return; // Группа не менялась — ничего не проверяем
-                    }
-    
-                    $group = Group::with(['children' => function($query) {
-                        $query->oldest('created_at');
-                    }])->find($newGroupId);
-    
-                    if ($group && $group->children_count >= 15) {
-                        $fail('В этой группе уже максимальное количество детей (15).');
-                    }
-    
-                    if ($group->children->isNotEmpty()) {
-                        $firstBirthDate = Carbon::parse($group->children->first()->birth_date);
-                        $minAllowed = $firstBirthDate->copy()->subMonths(6);
-                        $maxAllowed = $firstBirthDate->copy()->addMonths(6);
-    
-                        $childBirthDate = Carbon::parse($child->birth_date);
-    
-                        if ($childBirthDate < $minAllowed || $childBirthDate > $maxAllowed) {
-                            $fail("Нельзя переместить ребёнка в эту группу из-за большой разницы в возрасте.");
-                        }
-                    }
-                },
-            ],
+            'birth_date' => 'required|date',
+            'group_id' => 'required|exists:groups,id',
             'parent_id' => 'required|exists:users,id',
         ], [
             'last_name.regex' => 'Фамилия может содержать только буквы и дефисы',
@@ -234,7 +174,50 @@ class ChildController extends Controller
             'parent_id.exists' => 'Выбранный родитель не существует',
         ]);
     
-        $child->update($validated);
+        // Добавляем кастомную валидацию после основной
+        $newBirthDate = Carbon::parse($data['birth_date']);
+        $newGroupId = $data['group_id'];
+        $oldGroupId = $child->group_id;
+    
+        $ageInYears = $newBirthDate->diffInYears(Carbon::now());
+    
+        // Проверка возраста: 18 месяцев (1.5 года) до 8 лет
+        if ($ageInYears >= 8 || $newBirthDate->diffInMonths(Carbon::now()) < 18) {
+            return back()->withErrors(['birth_date' => 'Ребенку должно быть от 18 месяцев до 8 лет.'])
+                         ->withInput();
+        }
+    
+        // Проверяем, изменилась ли группа или дата рождения
+        $needsGroupCheck = $newGroupId != $oldGroupId || $newBirthDate->ne(Carbon::parse($child->birth_date));
+    
+        if ($needsGroupCheck) {
+            $group = Group::with(['children' => function($query) {
+                $query->oldest('created_at');
+            }])->find($newGroupId);
+    
+            if (!$group) {
+                return back()->withErrors(['group_id' => 'Группа не найдена.'])->withInput();
+            }
+    
+            if ($group->children_count >= 15) {
+                return back()->withErrors(['group_id' => 'В этой группе уже максимальное количество детей (15).'])->withInput();
+            }
+    
+            if ($group->children->isNotEmpty()) {
+                $firstBirthDate = Carbon::parse($group->children->first()->birth_date);
+                $minAllowed = $firstBirthDate->copy()->subMonths(6);
+                $maxAllowed = $firstBirthDate->copy()->addMonths(6);
+    
+                if ($newBirthDate < $minAllowed || $newBirthDate > $maxAllowed) {
+                    return back()
+                        ->withErrors(['birth_date' => "Нельзя добавить ребёнка в эту группу из-за большой разницы в возрасте."])
+                        ->withInput();
+                }
+            }
+        }
+    
+        // Все проверки пройдены — обновляем ребенка
+        $child->update($data);
     
         return redirect()->route('children.index')
             ->with('success', 'Данные ребенка успешно обновлены.');

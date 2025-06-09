@@ -70,12 +70,6 @@
                                         <p class="text-sm text-gray-700 mb-2">Текущее изображение:</p>
                                         <img src="{{ asset('storage/' . $news->image) }}" alt="{{ $news->title }}" 
                                              class="max-w-xs h-auto rounded-lg border border-gray-200">
-                                        <div class="mt-2">
-                                            <label class="inline-flex items-center">
-                                                <input type="checkbox" name="remove_image" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                                <span class="ml-2 text-sm text-gray-600">Удалить изображение</span>
-                                            </label>
-                                        </div>
                                     </div>
                                 @endif
                             </div>

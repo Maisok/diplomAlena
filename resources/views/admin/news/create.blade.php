@@ -60,7 +60,7 @@
 
                             <div>
                                 <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Изображение</label>
-                                <input type="file" name="image" id="image" 
+                                <input type="file" name="image" id="image" required
                                        class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg">
                                 <p class="mt-1 text-sm text-gray-500">Допустимые форматы: JPEG, PNG, JPG, GIF, SVG. Максимальный размер: 2MB</p>
                             </div>

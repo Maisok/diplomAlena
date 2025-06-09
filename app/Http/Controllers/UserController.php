@@ -86,11 +86,23 @@ class UserController extends Controller
         if (!auth()->user()->isAdmin()) {
             return redirect()->route('home');
         }
+    
+        // Проверяем, если пользователь родитель и имеет детей
+        if ($user->isParent() && $user->children->isNotEmpty()) {
+            // Если статус меняется и не остался "parent"
+            if ($request->filled('status') && $request->input('status') !== 'parent') {
+                return back()
+                    ->withErrors(['status' => 'Невозможно изменить статус: у родителя есть дети.'])
+                    ->withInput();
+            }
+        }
+    
+        // Теперь проводим валидацию
         $validated = $request->validate([
             'last_name' => 'required|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
             'first_name' => 'required|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
             'patronymic' => 'nullable|string|max:50|regex:/^[а-яА-ЯёЁa-zA-Z\- ]+$/u',
-           'status' => 'required|in:parent,educator,nanny',
+            'status' => 'required|in:parent,educator,nanny',
             'phone_number' => [
                 'required',
                 'string',
@@ -122,18 +134,18 @@ class UserController extends Controller
             'password.min' => 'Пароль не должен быть менее 8 символов',
             'password.max' => 'Пароль не должен превышать 255 символов',
         ]);
-
+    
         if (!empty($validated['password'])) {
             $validated['password'] = bcrypt($validated['password']);
         } else {
             unset($validated['password']);
         }
-
+    
         $user->update($validated);
-
-        return redirect()->route('users.index')->with('success', 'Пользователь успешно обновлен.');
+    
+        return redirect()->route('users.index')
+            ->with('success', 'Пользователь успешно обновлен.');
     }
-
     public function destroy(User $user)
     {
         if (!auth()->user()->isAdmin()) {
